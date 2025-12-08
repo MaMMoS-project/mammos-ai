@@ -20,8 +20,8 @@ import onnxruntime as ort
 _MODEL_DIR = Path(__file__).parent
 
 MODELS = {
-    "soft": _MODEL_DIR / "random_forest_soft.onnx",
-    "hard": _MODEL_DIR / "random_forest_hard.onnx",
+    "soft": _MODEL_DIR / "random_forest_soft_v1.onnx",
+    "hard": _MODEL_DIR / "random_forest_hard_v1.onnx",
 }
 
 _SESSION_OPTIONS = ort.SessionOptions()
