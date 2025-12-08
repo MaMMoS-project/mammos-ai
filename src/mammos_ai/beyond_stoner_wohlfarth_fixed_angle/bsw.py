@@ -33,7 +33,7 @@ def classify_magnetic_from_Ms_A_K(
     A: mammos_entity.Entity | astropy.units.Quantity | numbers.Number,
     Ku: mammos_entity.Entity | astropy.units.Quantity | numbers.Number,
     model: str = "random-forest-v1",
-) -> str:
+) -> str | list[str]:
     """Classify material as soft or hard magnetic from micromagnetic properties.
 
     This function classifies a magnetic material as either soft or hard magnetic
@@ -64,11 +64,13 @@ def classify_magnetic_from_Ms_A_K(
     X = np.column_stack(
         [np.atleast_1d(Ms.value), np.atleast_1d(A.value), np.atleast_1d(Ku.value)]
     ).astype(np.float32)
-    return (
-        "soft"
-        if session.run(None, {session.get_inputs()[0].name: X})[0][0] == 0
-        else "hard"
-    )
+
+    results = session.run(None, {session.get_inputs()[0].name: X})[0]
+    labels = np.where(results == 0, "soft", "hard")
+
+    if np.ndim(Ms.value) == 0 and np.ndim(A.value) == 0 and np.ndim(Ku.value) == 0:
+        return labels.item()
+    return labels.flatten().tolist()
 
 
 def Hc_Mr_BHmax_from_Ms_A_K(
@@ -114,10 +116,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
             # 1. Determine class
             mat_class = classify_magnetic_from_Ms_A_K(Ms, A, Ku, model=model)
 
-            # 2. Load regression model
-            session = ort.InferenceSession(MODELS[mat_class], _SESSION_OPTIONS)
-
-            # 3. Preprocess
+            # 2. Preprocess
             X_log = np.log1p(
                 np.column_stack(
                     [
@@ -128,16 +127,42 @@ def Hc_Mr_BHmax_from_Ms_A_K(
                 ).astype(np.float32)
             )
 
-            # 4. Inference
-            y_log = session.run(None, {session.get_inputs()[0].name: X_log})[0]
+            y_log = np.empty((X_log.shape[0], 3), dtype=np.float32)
+            classes = np.atleast_1d(mat_class)
+
+            for cls in ["soft", "hard"]:
+                mask = classes == cls
+                if np.any(mask):
+                    # 3. Load regression model
+                    session = ort.InferenceSession(str(MODELS[cls]), _SESSION_OPTIONS)
+                    X_subset = X_log[mask]
+                    # 4. Predict
+                    res = session.run(None, {session.get_inputs()[0].name: X_subset})[0]
+                    y_log[mask] = res
 
             # 5. Postprocess
-            y = np.expm1(y_log)[0]
+            y = np.expm1(y_log)
+
+            if (
+                np.ndim(Ms.value) == 0
+                and np.ndim(A.value) == 0
+                and np.ndim(Ku.value) == 0
+            ):
+                y = y[0]
 
         case _:
             raise ValueError(f"Unknown model {model}")
 
-    Hc = me.Hc(y[0], "A/m")
-    Mr = me.Mr(y[1], "A/m")
-    BHmax = me.BHmax(y[2], "J/m3")
+    if y.ndim == 1:
+        Hc_val = y[0]
+        Mr_val = y[1]
+        BHmax_val = y[2]
+    else:
+        Hc_val = y[:, 0]
+        Mr_val = y[:, 1]
+        BHmax_val = y[:, 2]
+
+    Hc = me.Hc(Hc_val, "A/m")
+    Mr = me.Mr(Mr_val, "A/m")
+    BHmax = me.BHmax(BHmax_val, "J/m3")
     return mammos_analysis.hysteresis.ExtrinsicProperties(Hc=Hc, Mr=Mr, BHmax=BHmax)
