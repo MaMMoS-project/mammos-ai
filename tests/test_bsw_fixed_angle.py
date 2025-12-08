@@ -18,6 +18,7 @@ import mammos_ai
     ],
 )
 def test_classify_magnetic_from_Ms_A_K(Ms, A, Ku):
+    """Test classification of magnetic materials from Ms, A, Ku."""
     classification = mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
 
     if isinstance(classification, str):
@@ -33,6 +34,7 @@ def test_classify_magnetic_from_Ms_A_K_zeros():
 
 
 def test_classify_magnetic_from_Ms_A_K_soft():
+    """Test classification of a soft magnetic material."""
     Ms = me.Ms(1e6)
     A = me.A(1e-12)
     Ku = me.Ku(1e3)
@@ -41,6 +43,7 @@ def test_classify_magnetic_from_Ms_A_K_soft():
 
 
 def test_classify_magnetic_from_Ms_A_K_hard():
+    """Test classification of a hard magnetic material."""
     Ms = me.Ms(1e6)
     A = me.A(1e-12)
     Ku = me.Ku(1e8)
@@ -49,6 +52,7 @@ def test_classify_magnetic_from_Ms_A_K_hard():
 
 
 def test_classify_magnetic_from_Ms_A_K_specify_model():
+    """Test specifying different models for classification."""
     Ms = me.Ms(1e6)
     A = me.A(1e-12)
     Ku = me.Ku(1e6)
@@ -64,18 +68,33 @@ def test_classify_magnetic_from_Ms_A_K_specify_model():
 
 def test_classify_magnetic_array_inputs():
     """Test that array inputs are processed correctly for classification."""
-    # Test with array inputs - soft and hard materials
-    Ms = me.Ms([1e6, 1e6]).value
-    A = me.A([1e-12, 1e-12]).value
-    Ku = me.Ku([1e3, 1e8]).value  # First soft, second hard
+    Ms = me.Ms([1e6, 1e6])
+    A = me.A([1e-12, 1e-12])
+    Ku = me.Ku([1e3, 1e8])
 
     classification = mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
 
-    # Check that we get an array-like output with correct length and values
     assert isinstance(classification, list)
     assert len(classification) == 2
     assert classification[0] == "soft"
     assert classification[1] == "hard"
+
+
+def test_classify_magnetic_array_inputs_mixed_lengths():
+    """Test that array inputs of mixed lengths raise an error."""
+    Ms = me.Ms(1e6)
+    A = me.A([1e-12, 1e-12])
+    Ku = me.Ku([1e3, 1e8])
+
+    with pytest.raises(ValueError):
+        mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
+
+    Ms = me.Ms([1e6])
+    A = me.A([1e-12, 2e-12])
+    Ku = me.Ku([1e3, 1e8])
+
+    with pytest.raises(ValueError):
+        mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
 
 
 @pytest.mark.parametrize(
@@ -90,6 +109,7 @@ def test_classify_magnetic_array_inputs():
     ],
 )
 def test_Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku):
+    """Test Hc, Mr, BHmax prediction from Ms, A, Ku."""
     extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
 
     assert isinstance(
@@ -105,6 +125,7 @@ def test_Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku):
 
 
 def test_Hc_Mr_BHmax_from_Ms_A_K_specify_model():
+    """Test specifying different models for Hc, Mr, BHmax prediction."""
     Ms = me.Ms(1e6)
     A = me.A(1e-12)
     Ku = me.Ku(1e6)
@@ -123,24 +144,36 @@ def test_Hc_Mr_BHmax_from_Ms_A_K_specify_model():
 
 def test_Hc_Mr_BHmax_array_inputs():
     """Test that array inputs produce correct shape outputs for predictions."""
-    # Test with multiple samples
-    Ms = me.Ms([1e6, 2e6]).value
-    A = me.A([1e-12, 2e-12]).value
-    Ku = me.Ku([1e6, 2e6]).value
-
+    Ms = me.Ms([1e6, 2e6])
+    A = me.A([1e-12, 2e-12])
+    Ku = me.Ku([1e6, 2e6])
     extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
 
-    # Verify output types
     assert isinstance(
         extrinsic_properties, mammos_analysis.hysteresis.ExtrinsicProperties
     )
 
-    # Check shapes - should match input length of 2
     assert np.shape(extrinsic_properties.Hc.value) == (2,)
     assert np.shape(extrinsic_properties.Mr.value) == (2,)
     assert np.shape(extrinsic_properties.BHmax.value) == (2,)
 
-    # All values should be positive
     assert np.all(extrinsic_properties.Hc.value > 0)
     assert np.all(extrinsic_properties.Mr.value > 0)
     assert np.all(extrinsic_properties.BHmax.value > 0)
+
+
+def test_Hc_Mr_BHmax_array_inputs_mixed_lengths():
+    """Test that array inputs of mixed lengths raise an error."""
+    Ms = me.Ms(1e6)
+    A = me.A([1e-12, 2e-12])
+    Ku = me.Ku([1e6, 2e6])
+
+    with pytest.raises(ValueError):
+        mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
+
+    Ms = me.Ms([1e6])
+    A = me.A([1e-12, 2e-12])
+    Ku = me.Ku([1e6, 2e6])
+
+    with pytest.raises(ValueError):
+        mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
