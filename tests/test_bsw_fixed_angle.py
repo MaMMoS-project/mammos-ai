@@ -62,6 +62,22 @@ def test_classify_magnetic_from_Ms_A_K_specify_model():
         mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku, model="non-existent-model")
 
 
+def test_classify_magnetic_array_inputs():
+    """Test that array inputs are processed correctly for classification."""
+    # Test with array inputs - soft and hard materials
+    Ms = me.Ms([1e6, 1e6]).value
+    A = me.A([1e-12, 1e-12]).value
+    Ku = me.Ku([1e3, 1e8]).value  # First soft, second hard
+
+    classification = mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
+
+    # Check that we get an array-like output with correct length and values
+    assert isinstance(classification, list)
+    assert len(classification) == 2
+    assert classification[0] == "soft"
+    assert classification[1] == "hard"
+
+
 @pytest.mark.parametrize(
     "Ms,A,Ku",
     [
@@ -103,22 +119,6 @@ def test_Hc_Mr_BHmax_from_Ms_A_K_specify_model():
 
     with pytest.raises(ValueError):
         mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku, model="non-existent-model")
-
-
-def test_classify_magnetic_array_inputs():
-    """Test that array inputs are processed correctly for classification."""
-    # Test with array inputs - soft and hard materials
-    Ms = me.Ms([1e6, 1e6]).value
-    A = me.A([1e-12, 1e-12]).value
-    Ku = me.Ku([1e3, 1e8]).value  # First soft, second hard
-
-    classification = mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
-
-    # Check that we get an array-like output with correct length and values
-    assert isinstance(classification, list)
-    assert len(classification) == 2
-    assert classification[0] == "soft"
-    assert classification[1] == "hard"
 
 
 def test_Hc_Mr_BHmax_array_inputs():
