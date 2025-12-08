@@ -61,7 +61,9 @@ def classify_magnetic_from_Ms_A_K(
             raise ValueError(f"Unknown model {model}")
 
     session = ort.InferenceSession(str(classifier_path), _SESSION_OPTIONS)
-    X = np.array([[Ms.value, A.value, Ku.value]], dtype=np.float32)
+    X = np.column_stack(
+        [np.atleast_1d(Ms.value), np.atleast_1d(A.value), np.atleast_1d(Ku.value)]
+    ).astype(np.float32)
     return (
         "soft"
         if session.run(None, {session.get_inputs()[0].name: X})[0][0] == 0
@@ -117,7 +119,13 @@ def Hc_Mr_BHmax_from_Ms_A_K(
 
             # 3. Preprocess
             X_log = np.log1p(
-                np.array([[Ms.value, A.value, Ku.value]], dtype=np.float32)
+                np.column_stack(
+                    [
+                        np.atleast_1d(Ms.value),
+                        np.atleast_1d(A.value),
+                        np.atleast_1d(Ku.value),
+                    ]
+                ).astype(np.float32)
             )
 
             # 4. Inference
