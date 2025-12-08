@@ -38,6 +38,20 @@ def test_classify_magnetic_from_Ms_A_K_hard():
     assert classification == "hard"
 
 
+def test_classify_magnetic_from_Ms_A_K_specify_model():
+    Ms = me.Ms(1e6)
+    A = me.A(1e-12)
+    Ku = me.Ku(1e6)
+
+    classification = mammos_ai.classify_magnetic_from_Ms_A_K(
+        Ms, A, Ku, model="random-forest-v1"
+    )
+    assert classification in ["soft", "hard"]
+
+    with pytest.raises(ValueError):
+        mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku, model="non-existent-model")
+
+
 @pytest.mark.xfail(reason="Currently no model for this case, should raise an error")
 def test_Hc_Mr_BHmax_from_Ms_A_K():
     Ms = me.Ms(1e5)
