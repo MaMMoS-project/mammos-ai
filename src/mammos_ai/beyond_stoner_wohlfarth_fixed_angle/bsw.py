@@ -103,17 +103,33 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(me.Ms(1e5), me.A(1e-12), me.Ku(1e6))
     ExtrinsicProperties(Hc=..., Mr=..., BHmax=...)
     """
-    # TODO for MPSD validate input arguments (required in multiple packages)
-    # @MPCDF: assume the arguments are of type mammos_entity.Entity
+    Ms = me.Ms(Ms, unit=u.A / u.m)
+    A = me.A(A, unit=u.J / u.m)
+    Ku = me.Ku(Ku, unit=u.J / u.m**3)
 
     match model:
         case "random-forest-v1":
-            # TODO call function for the correct model
-            pass
+            # 1. Determine class
+            mat_class = classify_magnetic_from_Ms_A_K(Ms, A, Ku, model=model)
+
+            # 2. Load regression model
+            session = ort.InferenceSession(MODELS[mat_class], _SESSION_OPTIONS)
+
+            # 3. Preprocess
+            X_log = np.log1p(
+                np.array([[Ms.value, A.value, Ku.value]], dtype=np.float32)
+            )
+
+            # 4. Inference
+            y_log = session.run(None, {session.get_inputs()[0].name: X_log})[0]
+
+            # 5. Postprocess
+            y = np.expm1(y_log)[0]
+
         case _:
             raise ValueError(f"Unknown model {model}")
 
-    Hc = me.Hc(0, "A/m")  # TODO: replace with model output
-    Mr = me.Mr(0, "A/m")  # TODO: replace with model output
-    BHmax = me.BHmax(0, "J/m3")  # TODO: replace with model output
+    Hc = me.Hc(y[0], "A/m")
+    Mr = me.Mr(y[1], "A/m")
+    BHmax = me.BHmax(y[2], "J/m3")
     return mammos_analysis.hysteresis.ExtrinsicProperties(Hc=Hc, Mr=Mr, BHmax=BHmax)
