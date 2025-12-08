@@ -86,14 +86,14 @@ def test_classify_magnetic_array_inputs_mixed_lengths():
     A = me.A([1e-12, 1e-12])
     Ku = me.Ku([1e3, 1e8])
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Input arrays must have the same length"):
         mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
 
     Ms = me.Ms([1e6])
     A = me.A([1e-12, 2e-12])
     Ku = me.Ku([1e3, 1e8])
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Input arrays must have the same length"):
         mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
 
 
@@ -168,12 +168,12 @@ def test_Hc_Mr_BHmax_array_inputs_mixed_lengths():
     A = me.A([1e-12, 2e-12])
     Ku = me.Ku([1e6, 2e6])
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Input arrays must have the same length"):
         mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
 
     Ms = me.Ms([1e6])
     A = me.A([1e-12, 2e-12])
     Ku = me.Ku([1e6, 2e6])
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Input arrays must have the same length"):
         mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)

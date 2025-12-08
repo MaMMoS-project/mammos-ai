@@ -54,6 +54,16 @@ def classify_magnetic_from_Ms_A_K(
     A = me.A(A, unit=u.J / u.m)
     Ku = me.Ku(Ku, unit=u.J / u.m**3)
 
+    Ms_arr = np.atleast_1d(Ms.value)
+    A_arr = np.atleast_1d(A.value)
+    Ku_arr = np.atleast_1d(Ku.value)
+
+    if not (Ms_arr.shape == A_arr.shape == Ku_arr.shape):
+        raise ValueError(
+            f"Input arrays must have the same length. Shapes are Ms: {Ms_arr.shape}, "
+            f"A: {A_arr.shape}, Ku: {Ku_arr.shape}"
+        )
+
     match model:
         case "random-forest-v1":
             classifier_path = _MODEL_DIR / "classifier_random_forest_v1.onnx"
@@ -61,14 +71,12 @@ def classify_magnetic_from_Ms_A_K(
             raise ValueError(f"Unknown model {model}")
 
     session = ort.InferenceSession(str(classifier_path), _SESSION_OPTIONS)
-    X = np.column_stack(
-        [np.atleast_1d(Ms.value), np.atleast_1d(A.value), np.atleast_1d(Ku.value)]
-    ).astype(np.float32)
+    X = np.column_stack([Ms_arr, A_arr, Ku_arr]).astype(np.float32)
 
     results = session.run(None, {session.get_inputs()[0].name: X})[0]
     labels = np.where(results == 0, "soft", "hard")
 
-    if np.ndim(Ms.value) == 0 and np.ndim(A.value) == 0 and np.ndim(Ku.value) == 0:
+    if X.shape[0] == 1:
         return labels.item()
     return labels.flatten().tolist()
 
@@ -111,6 +119,16 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     A = me.A(A, unit=u.J / u.m)
     Ku = me.Ku(Ku, unit=u.J / u.m**3)
 
+    Ms_arr = np.atleast_1d(Ms.value)
+    A_arr = np.atleast_1d(A.value)
+    Ku_arr = np.atleast_1d(Ku.value)
+
+    if not (Ms_arr.shape == A_arr.shape == Ku_arr.shape):
+        raise ValueError(
+            f"Input arrays must have the same length. Shapes are Ms: {Ms_arr.shape}, "
+            f"A: {A_arr.shape}, Ku: {Ku_arr.shape}"
+        )
+
     match model:
         case "random-forest-v1":
             # 1. Determine class
@@ -118,13 +136,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
 
             # 2. Preprocess
             X_log = np.log1p(
-                np.column_stack(
-                    [
-                        np.atleast_1d(Ms.value),
-                        np.atleast_1d(A.value),
-                        np.atleast_1d(Ku.value),
-                    ]
-                ).astype(np.float32)
+                np.column_stack([Ms_arr, A_arr, Ku_arr]).astype(np.float32)
             )
 
             y_log = np.empty((X_log.shape[0], 3), dtype=np.float32)
@@ -143,11 +155,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
             # 5. Postprocess
             y = np.expm1(y_log)
 
-            if (
-                np.ndim(Ms.value) == 0
-                and np.ndim(A.value) == 0
-                and np.ndim(Ku.value) == 0
-            ):
+            if X_log.shape[0] == 1:
                 y = y[0]
 
         case _:
