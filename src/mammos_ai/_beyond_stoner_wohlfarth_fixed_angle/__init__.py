@@ -17,11 +17,12 @@ import mammos_units as u
 import numpy as np
 import onnxruntime as ort
 
-_MODEL_DIR = Path(__file__).parent
+MODEL_DIR = Path(__file__).parent
 
 MODELS = {
-    "soft": _MODEL_DIR / "random_forest_soft_v1.onnx",
-    "hard": _MODEL_DIR / "random_forest_hard_v1.onnx",
+    "classifier": MODEL_DIR / "classifier_random_forest_v1.onnx",
+    "soft": MODEL_DIR / "random_forest_soft_v1.onnx",
+    "hard": MODEL_DIR / "random_forest_hard_v1.onnx",
 }
 
 _SESSION_OPTIONS = ort.SessionOptions()
@@ -34,11 +35,14 @@ def classify_magnetic_from_Ms_A_K(
     Ku: mammos_entity.Entity | astropy.units.Quantity | numbers.Number,
     model: str = "random-forest-v1",
 ) -> str | list[str]:
-    """Classify material as soft or hard magnetic from micromagnetic properties.
+    """Classify material as soft or hard magnetic from micromagnetic parameters.
 
     This function classifies a magnetic material as either soft or hard magnetic
-    based on its micromagnetic properties spontaneous magnetization Ms, exchange
+    based on its micromagnetic parameters spontaneous magnetization Ms, exchange
     stiffness constant A and uniaxial anisotropy constant Ku.
+    The shape of the input parameters needs to be the same. If single values are
+    provided, a single classification is returned. If 1D arrays are provided, a
+    list of classifications is returned.
 
     Args:
        Ms: Spontaneous magnetization.
@@ -66,11 +70,11 @@ def classify_magnetic_from_Ms_A_K(
 
     match model:
         case "random-forest-v1":
-            classifier_path = _MODEL_DIR / "classifier_random_forest_v1.onnx"
+            classifier_path = MODELS["classifier"]
         case _:
             raise ValueError(f"Unknown model {model}")
 
-    session = ort.InferenceSession(str(classifier_path), _SESSION_OPTIONS)
+    session = ort.InferenceSession(classifier_path, _SESSION_OPTIONS)
     X = np.column_stack([Ms_arr, A_arr, Ku_arr]).astype(np.float32)
 
     results = session.run(None, {session.get_inputs()[0].name: X})[0]
