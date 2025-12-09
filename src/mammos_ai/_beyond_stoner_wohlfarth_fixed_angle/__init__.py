@@ -32,14 +32,14 @@ _SESSION_OPTIONS.log_severity_level = 3
 def classify_magnetic_from_Ms_A_K(
     Ms: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
     A: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
-    Ku: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
+    K1: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
     model: str = "random-forest-v1",
 ) -> str | np.ndarray:
     """Classify material as soft or hard magnetic from micromagnetic parameters.
 
     This function classifies a magnetic material as either soft or hard magnetic
     based on its micromagnetic parameters spontaneous magnetization Ms, exchange
-    stiffness constant A and uniaxial anisotropy constant Ku.
+    stiffness constant A and uniaxial anisotropy constant K1.
     The shape of the input parameters needs to be the same. If single values are
     provided, a single classification is returned. If arrays are provided, a
     numpy array with the same shape is returned.
@@ -47,7 +47,7 @@ def classify_magnetic_from_Ms_A_K(
     Args:
        Ms: Spontaneous magnetization.
        A: Exchange stiffness constant.
-       Ku: Uniaxial anisotropy constant.
+       K1: Uniaxial anisotropy constant.
        model: AI model used for the classification
 
     Returns:
@@ -57,16 +57,16 @@ def classify_magnetic_from_Ms_A_K(
     """
     Ms = me.Ms(Ms, unit=u.A / u.m)
     A = me.A(A, unit=u.J / u.m)
-    Ku = me.Ku(Ku, unit=u.J / u.m**3)
+    K1 = me.Ku(K1, unit=u.J / u.m**3)
 
     Ms_arr = np.atleast_1d(Ms.value)
     A_arr = np.atleast_1d(A.value)
-    Ku_arr = np.atleast_1d(Ku.value)
+    K1_arr = np.atleast_1d(K1.value)
 
-    if not (Ms_arr.shape == A_arr.shape == Ku_arr.shape):
+    if not (Ms_arr.shape == A_arr.shape == K1_arr.shape):
         raise ValueError(
             f"Input arrays must have the same shape. Shapes are Ms: {Ms_arr.shape}, "
-            f"A: {A_arr.shape}, Ku: {Ku_arr.shape}"
+            f"A: {A_arr.shape}, Ku: {K1_arr.shape}"
         )
 
     original_shape = Ms_arr.shape
@@ -79,7 +79,7 @@ def classify_magnetic_from_Ms_A_K(
             raise ValueError(f"Unknown model {model}")
 
     session = ort.InferenceSession(classifier_path, _SESSION_OPTIONS)
-    X = np.column_stack([Ms_arr.ravel(), A_arr.ravel(), Ku_arr.ravel()]).astype(
+    X = np.column_stack([Ms_arr.ravel(), A_arr.ravel(), K1_arr.ravel()]).astype(
         np.float32
     )
 
@@ -95,10 +95,10 @@ def classify_magnetic_from_Ms_A_K(
 def Hc_Mr_BHmax_from_Ms_A_K(
     Ms: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
     A: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
-    Ku: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
+    K1: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
     model: str = "random-forest-v1",
 ) -> mammos_analysis.hysteresis.ExtrinsicProperties:
-    """Predict Hc, Mr and BHmax from micromagnetic properties Ms, A and Ku.
+    """Predict Hc, Mr and BHmax from micromagnetic properties Ms, A and K1.
 
     This function predicts extrinsic properties coercive field Hc, remanent
     magnetization Mr and maximum energy product BHmax given a set of micromagnetic
@@ -114,7 +114,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     Args:
        Ms: Spontaneous magnetization.
        A: Exchange stiffness constant.
-       Ku: Uniaxial anisotropy constant.
+       K1: Uniaxial anisotropy constant.
        model: AI model used for the prediction
 
     Returns:
@@ -128,16 +128,16 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     """
     Ms = me.Ms(Ms, unit=u.A / u.m)
     A = me.A(A, unit=u.J / u.m)
-    Ku = me.Ku(Ku, unit=u.J / u.m**3)
+    K1 = me.Ku(K1, unit=u.J / u.m**3)
 
     Ms_arr = np.atleast_1d(Ms.value)
     A_arr = np.atleast_1d(A.value)
-    Ku_arr = np.atleast_1d(Ku.value)
+    K1_arr = np.atleast_1d(K1.value)
 
-    if not (Ms_arr.shape == A_arr.shape == Ku_arr.shape):
+    if not (Ms_arr.shape == A_arr.shape == K1_arr.shape):
         raise ValueError(
             f"Input arrays must have the same shape. Shapes are Ms: {Ms_arr.shape}, "
-            f"A: {A_arr.shape}, Ku: {Ku_arr.shape}"
+            f"A: {A_arr.shape}, Ku: {K1_arr.shape}"
         )
 
     original_shape = Ms_arr.shape
@@ -146,11 +146,11 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     match model:
         case "random-forest-v1":
             # 1. Determine class
-            mat_class = classify_magnetic_from_Ms_A_K(Ms, A, Ku, model=model)
+            mat_class = classify_magnetic_from_Ms_A_K(Ms, A, K1, model=model)
 
             # 2. Preprocess
             X_log = np.log1p(
-                np.column_stack([Ms_arr.ravel(), A_arr.ravel(), Ku_arr.ravel()]).astype(
+                np.column_stack([Ms_arr.ravel(), A_arr.ravel(), K1_arr.ravel()]).astype(
                     np.float32
                 )
             )
