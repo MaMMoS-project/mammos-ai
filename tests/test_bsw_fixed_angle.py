@@ -6,26 +6,62 @@ import pytest
 import mammos_ai
 
 
-@pytest.mark.parametrize(
-    "Ms,A,Ku",
-    [
-        (me.Ms(1e6), me.A(1e-12), me.Ku(1e6)),
-        (me.Ms(1e6).q, me.A(1e-12).q, me.Ku(1e6).q),
-        (me.Ms(1e6).value, me.A(1e-12).value, me.Ku(1e6).value),
-        (me.Ms([1e6, 2e6]), me.A([1e-12, 2e-12]), me.Ku([1e6, 2e6])),
-        (me.Ms([1e6, 2e6]).q, me.A([1e-12, 2e-12]).q, me.Ku([1e6, 2e6]).q),
-        (me.Ms([1e6, 2e6]).value, me.A([1e-12, 2e-12]).value, me.Ku([1e6, 2e6]).value),
-    ],
-)
-def test_classify_magnetic_from_Ms_A_K(Ms, A, Ku):
+@pytest.mark.parametrize("Ms", [me.Ms(1e6), me.Ms(1e6).q, me.Ms(1e6).value])
+@pytest.mark.parametrize("A", [me.A(1e-12), me.A(1e-12).q, me.A(1e-12).value])
+@pytest.mark.parametrize("Ku", [me.Ku(1e6), me.Ku(1e6).q, me.Ku(1e6).value])
+def test_classify_magnetic_from_Ms_A_K_single_input(Ms, A, Ku):
     """Test classification of magnetic materials from Ms, A, Ku."""
     classification = mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
+    assert classification in ["soft", "hard"]
 
-    if isinstance(classification, str):
-        assert classification in ["soft", "hard"]
-    else:
-        assert isinstance(classification, np.ndarray)
-        assert np.all(np.isin(classification, ["soft", "hard"]))
+
+@pytest.mark.parametrize(
+    "Ms", [me.Ms([1e6, 2e6]), me.Ms([1e6, 2e6]).q, me.Ms([1e6, 2e6]).value]
+)
+@pytest.mark.parametrize(
+    "A", [me.A([1e-12, 2e-12]), me.A([1e-12, 2e-12]).q, me.A([1e-12, 2e-12]).value]
+)
+@pytest.mark.parametrize(
+    "Ku", [me.Ku([1e6, 2e6]), me.Ku([1e6, 2e6]).q, me.Ku([1e6, 2e6]).value]
+)
+def test_classify_magnetic_from_Ms_A_K_1d_array(Ms, A, Ku):
+    """Test classification of magnetic materials from Ms, A, Ku."""
+    classification = mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
+    assert isinstance(classification, np.ndarray)
+    assert classification.shape == (2,)
+    assert all(c in ["soft", "hard"] for c in classification)
+
+
+@pytest.mark.parametrize(
+    "Ms",
+    [
+        me.Ms([[1e6, 2e6], [3e6, 4e6]]),
+        me.Ms([[1e6, 2e6], [3e6, 4e6]]).q,
+        me.Ms([[1e6, 2e6], [3e6, 4e6]]).value,
+    ],
+)
+@pytest.mark.parametrize(
+    "A",
+    [
+        me.A([[1e-12, 2e-12], [3e-12, 4e-12]]),
+        me.A([[1e-12, 2e-12], [3e-12, 4e-12]]).q,
+        me.A([[1e-12, 2e-12], [3e-12, 4e-12]]).value,
+    ],
+)
+@pytest.mark.parametrize(
+    "Ku",
+    [
+        me.Ku([[1e6, 2e6], [3e6, 4e6]]),
+        me.Ku([[1e6, 2e6], [3e6, 4e6]]).q,
+        me.Ku([[1e6, 2e6], [3e6, 4e6]]).value,
+    ],
+)
+def test_classify_magnetic_from_Ms_A_K_nd_array(Ms, A, Ku):
+    """Test classification of magnetic materials from Ms, A, Ku."""
+    classification = mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
+    assert isinstance(classification, np.ndarray)
+    assert classification.shape == (2, 2)
+    assert all(c in ["soft", "hard"] for c in classification.flatten())
 
 
 def test_classify_magnetic_from_Ms_A_K_zeros():
