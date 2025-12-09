@@ -30,11 +30,11 @@ _SESSION_OPTIONS.log_severity_level = 3
 
 
 def classify_magnetic_from_Ms_A_K(
-    Ms: mammos_entity.Entity | astropy.units.Quantity | numbers.Number,
-    A: mammos_entity.Entity | astropy.units.Quantity | numbers.Number,
-    Ku: mammos_entity.Entity | astropy.units.Quantity | numbers.Number,
+    Ms: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
+    A: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
+    Ku: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
     model: str = "random-forest-v1",
-) -> str | list[str] | np.ndarray:
+) -> str | np.ndarray:
     """Classify material as soft or hard magnetic from micromagnetic parameters.
 
     This function classifies a magnetic material as either soft or hard magnetic
@@ -52,7 +52,7 @@ def classify_magnetic_from_Ms_A_K(
 
     Returns:
        Classification as "soft" or "hard". Returns a string for scalar inputs,
-       a list for 1D arrays, or a numpy array for multi-dimensional inputs.
+       or a numpy array with the same shape as the input for array inputs.
 
     """
     Ms = me.Ms(Ms, unit=u.A / u.m)
@@ -93,9 +93,9 @@ def classify_magnetic_from_Ms_A_K(
 
 
 def Hc_Mr_BHmax_from_Ms_A_K(
-    Ms: mammos_entity.Entity | astropy.units.Quantity | numbers.Number,
-    A: mammos_entity.Entity | astropy.units.Quantity | numbers.Number,
-    Ku: mammos_entity.Entity | astropy.units.Quantity | numbers.Number,
+    Ms: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
+    A: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
+    Ku: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
     model: str = "random-forest-v1",
 ) -> mammos_analysis.hysteresis.ExtrinsicProperties:
     """Predict Hc, Mr and BHmax from micromagnetic properties Ms, A and Ku.
@@ -118,7 +118,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
        model: AI model used for the prediction
 
     Returns:
-       Extrinsic properties Hc, Mr, BHmax
+       An object containing extrinsic properties Hc, Mr, BHmax
 
     Examples:
     >>> import mammos_ai
@@ -162,7 +162,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
                 mask = classes == cls
                 if np.any(mask):
                     # 3. Load regression model
-                    session = ort.InferenceSession(str(MODELS[cls]), _SESSION_OPTIONS)
+                    session = ort.InferenceSession(MODELS[cls], _SESSION_OPTIONS)
                     X_subset = X_log[mask]
                     # 4. Predict
                     res = session.run(None, {session.get_inputs()[0].name: X_subset})[0]
