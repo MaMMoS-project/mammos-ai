@@ -24,7 +24,7 @@ def test_classify_magnetic_from_Ms_A_K(Ms, A, Ku):
     if isinstance(classification, str):
         assert classification in ["soft", "hard"]
     else:
-        assert isinstance(classification, list)
+        assert isinstance(classification, np.ndarray)
         assert np.all(np.isin(classification, ["soft", "hard"]))
 
 
@@ -74,7 +74,7 @@ def test_classify_magnetic_array_inputs():
 
     classification = mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
 
-    assert isinstance(classification, list)
+    assert isinstance(classification, np.ndarray)
     assert len(classification) == 2
     assert classification[0] == "soft"
     assert classification[1] == "hard"
@@ -86,14 +86,14 @@ def test_classify_magnetic_array_inputs_mixed_lengths():
     A = me.A([1e-12, 1e-12])
     Ku = me.Ku([1e3, 1e8])
 
-    with pytest.raises(ValueError, match="Input arrays must have the same length"):
+    with pytest.raises(ValueError, match="Input arrays must have the same shape"):
         mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
 
     Ms = me.Ms([1e6])
     A = me.A([1e-12, 2e-12])
     Ku = me.Ku([1e3, 1e8])
 
-    with pytest.raises(ValueError, match="Input arrays must have the same length"):
+    with pytest.raises(ValueError, match="Input arrays must have the same shape"):
         mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
 
 
@@ -168,12 +168,12 @@ def test_Hc_Mr_BHmax_array_inputs_mixed_lengths():
     A = me.A([1e-12, 2e-12])
     Ku = me.Ku([1e6, 2e6])
 
-    with pytest.raises(ValueError, match="Input arrays must have the same length"):
+    with pytest.raises(ValueError, match="Input arrays must have the same shape"):
         mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
 
     Ms = me.Ms([1e6])
     A = me.A([1e-12, 2e-12])
     Ku = me.Ku([1e6, 2e6])
 
-    with pytest.raises(ValueError, match="Input arrays must have the same length"):
+    with pytest.raises(ValueError, match="Input arrays must have the same shape"):
         mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)

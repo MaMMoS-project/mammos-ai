@@ -2,7 +2,7 @@
 
 import importlib.metadata
 
-from .beyond_stoner_wohlfarth_fixed_angle.bsw import (
+from ._beyond_stoner_wohlfarth_fixed_angle import (
     Hc_Mr_BHmax_from_Ms_A_K,
     classify_magnetic_from_Ms_A_K,
 )
