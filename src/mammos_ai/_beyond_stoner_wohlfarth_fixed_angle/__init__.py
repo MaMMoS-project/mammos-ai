@@ -180,7 +180,11 @@ def Hc_Mr_BHmax_from_Ms_A_K(
                     # 3. Load regression model
                     session = ort.InferenceSession(MODELS[cls], _SESSION_OPTIONS)
                     X_subset = X_log[mask]
-                    # 4. Predict
+
+                    # 4. Predict: input name obtained from model expects a shape
+                    # (n_samples_in_class, 3) containing [Ms, A, K1], returns 2D
+                    # array with shape (n_samples_in_class, 3) containing
+                    # [Hc, Mr, BHmax] predictions
                     res = session.run(None, {session.get_inputs()[0].name: X_subset})[0]
                     y_log[mask] = res
 
