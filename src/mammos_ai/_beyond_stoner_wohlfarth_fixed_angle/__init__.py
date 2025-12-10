@@ -94,6 +94,10 @@ def is_hard_magnet_from_Ms_A_K(
         np.float32
     )
 
+    # input name obtained from model expects a shape
+    # (n_samples, 3) containing [Ms, A, K1], returns 1D
+    # array with shape (n_samples,) containing class labels
+    # (0=soft magnetic, 1=hard magnetic)
     results = session.run(None, {session.get_inputs()[0].name: X})[0]
     labels = np.where(results == 0, False, True)
 
