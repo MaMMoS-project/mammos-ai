@@ -6,10 +6,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import numbers
-
     import astropy.units
     import mammos_entity
+    import numpy
 
 import mammos_analysis
 import mammos_entity as me
@@ -30,9 +29,9 @@ _SESSION_OPTIONS.log_severity_level = 3
 
 
 def is_hard_magnet_from_Ms_A_K(
-    Ms: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
-    A: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
-    K1: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
+    Ms: mammos_entity.Entity | astropy.units.Quantity | numpy.typing.ArrayLike,
+    A: mammos_entity.Entity | astropy.units.Quantity | numpy.typing.ArrayLike,
+    K1: mammos_entity.Entity | astropy.units.Quantity | numpy.typing.ArrayLike,
     model: str = "cube50_singlegrain_random_forest_v0.1",
 ) -> bool | np.ndarray:
     """Classify material as soft or hard magnetic from micromagnetic parameters.
@@ -152,9 +151,9 @@ def _predict_cube50_singlegrain_random_forest_v0_1(
 
 
 def Hc_Mr_BHmax_from_Ms_A_K(
-    Ms: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
-    A: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
-    K1: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
+    Ms: mammos_entity.Entity | astropy.units.Quantity | numpy.typing.ArrayLike,
+    A: mammos_entity.Entity | astropy.units.Quantity | numpy.typing.ArrayLike,
+    K1: mammos_entity.Entity | astropy.units.Quantity | numpy.typing.ArrayLike,
     model: str = "cube50_singlegrain_random_forest_v0.1",
 ) -> mammos_analysis.hysteresis.ExtrinsicProperties:
     """Predict Hc, Mr and BHmax from micromagnetic properties Ms, A and K1.
