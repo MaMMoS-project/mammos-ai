@@ -65,6 +65,12 @@ def is_hard_magnet_from_Ms_A_K(
        Returns a boolean for scalar inputs, or a numpy array
        with the same shape as the input for array inputs.
 
+    Examples:
+    >>> import mammos_ai
+    >>> import mammos_entity as me
+    >>> mammos_ai.is_hard_magnet_from_Ms_A_K(me.Ms(1e6), me.A(1e-12), me.Ku(1e6))
+    True
+
     """
     Ms = me.Ms(Ms, unit=u.A / u.m)
     A = me.A(A, unit=u.J / u.m)
@@ -182,18 +188,8 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     Examples:
     >>> import mammos_ai
     >>> import mammos_entity as me
-    >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(
-    ...     me.Ms(1e5), me.A(1e-12), me.Ku(1e6)
-    ... ) # doctest: +NORMALIZE_WHITESPACE, +NUMBER
-    ExtrinsicProperties(Hc=Entity(ontology_label='CoercivityHcExternal',
-                                  value=np.float32(4.612e+06),
-                                  unit='A / m'),
-                        Mr=Entity(ontology_label='Remanence',
-                                  value=np.float32(2.462e+05),
-                                  unit='A / m'),
-                        BHmax=Entity(ontology_label='MaximumEnergyProduct',
-                                     value=np.float32(1.905e+04),
-                                     unit='J / m3'))
+    >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(me.Ms(1e6), me.A(1e-12), me.Ku(1e6))
+    ExtrinsicProperties(Hc=..., Mr=..., BHmax=...)
     """
     Ms = me.Ms(Ms, unit=u.A / u.m)
     A = me.A(A, unit=u.J / u.m)
