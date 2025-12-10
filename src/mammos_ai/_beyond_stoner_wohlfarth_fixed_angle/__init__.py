@@ -143,8 +143,18 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     Examples:
     >>> import mammos_ai
     >>> import mammos_entity as me
-    >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(me.Ms(1e5), me.A(1e-12), me.Ku(1e6))
-    ExtrinsicProperties(Hc=..., Mr=..., BHmax=...)
+    >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(
+    ...     me.Ms(1e5), me.A(1e-12), me.Ku(1e6)
+    ... ) # doctest: +NORMALIZE_WHITESPACE, +NUMBER
+    ExtrinsicProperties(Hc=Entity(ontology_label='CoercivityHcExternal',
+                                  value=np.float32(4.611829e+06),
+                                  unit='A / m'),
+                        Mr=Entity(ontology_label='Remanence',
+                                  value=np.float32(246245.47),
+                                  unit='A / m'),
+                        BHmax=Entity(ontology_label='MaximumEnergyProduct',
+                                     value=np.float32(19047.016),
+                                     unit='J / m3'))
     """
     Ms = me.Ms(Ms, unit=u.A / u.m)
     A = me.A(A, unit=u.J / u.m)
