@@ -118,8 +118,13 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     Different models are available for the prediction. The following list provides an
     overview:
 
-    - ``random-forest-v1``: TODO explain details of model, training data,
-      Zenodo DOI to dataset and simulation script
+    - ``cube50_singlegrain_random_forest_v0.1``: Random forest model trained on
+      simulated data for single grain cubic particles with 50 nm edge length with
+      the external field applied parallel to the anisotropy axis. These are both
+      aligned along an edge of the cube. Further details on the training data
+      and model can be found in the
+      `model repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
+
 
 
     Args:
