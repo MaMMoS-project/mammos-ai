@@ -133,18 +133,10 @@ def test_classify_magnetic_array_inputs_mixed_lengths():
         mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
 
 
-@pytest.mark.parametrize(
-    "Ms,A,Ku",
-    [
-        (me.Ms(1e6), me.A(1e-12), me.Ku(1e6)),
-        (me.Ms(1e6).q, me.A(1e-12).q, me.Ku(1e6).q),
-        (me.Ms(1e6).value, me.A(1e-12).value, me.Ku(1e6).value),
-        (me.Ms([1e6, 2e6]), me.A([1e-12, 2e-12]), me.Ku([1e6, 2e6])),
-        (me.Ms([1e6, 2e6]).q, me.A([1e-12, 2e-12]).q, me.Ku([1e6, 2e6]).q),
-        (me.Ms([1e6, 2e6]).value, me.A([1e-12, 2e-12]).value, me.Ku([1e6, 2e6]).value),
-    ],
-)
-def test_Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku):
+@pytest.mark.parametrize("Ms", [me.Ms(1e6), me.Ms(1e6).q, me.Ms(1e6).value])
+@pytest.mark.parametrize("A", [me.A(1e-12), me.A(1e-12).q, me.A(1e-12).value])
+@pytest.mark.parametrize("Ku", [me.Ku(1e6), me.Ku(1e6).q, me.Ku(1e6).value])
+def test_Hc_Mr_BHmax_from_Ms_A_K_single_input(Ms, A, Ku):
     """Test Hc, Mr, BHmax prediction from Ms, A, Ku."""
     extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
 
@@ -160,15 +152,39 @@ def test_Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku):
     assert np.all(extrinsic_properties.BHmax.q > 0)
 
 
-def test_Hc_Mr_BHmax_from_Ms_A_K_specify_model():
+@pytest.mark.parametrize(
+    "Ms", [me.Ms([1e6, 2e6]), me.Ms([1e6, 2e6]).q, me.Ms([1e6, 2e6]).value]
+)
+@pytest.mark.parametrize(
+    "A", [me.A([1e-12, 2e-12]), me.A([1e-12, 2e-12]).q, me.A([1e-12, 2e-12]).value]
+)
+@pytest.mark.parametrize(
+    "Ku", [me.Ku([1e6, 2e6]), me.Ku([1e6, 2e6]).q, me.Ku([1e6, 2e6]).value]
+)
+def test_Hc_Mr_BHmax_from_Ms_A_K_1d_array(Ms, A, Ku):
+    """Test Hc, Mr, BHmax prediction from Ms, A, Ku."""
+    extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
+
+    assert isinstance(
+        extrinsic_properties, mammos_analysis.hysteresis.ExtrinsicProperties
+    )
+    assert isinstance(extrinsic_properties.Hc, me.Entity)
+    assert isinstance(extrinsic_properties.Mr, me.Entity)
+    assert isinstance(extrinsic_properties.BHmax, me.Entity)
+
+    assert np.all(extrinsic_properties.Hc.q > 0)
+    assert np.all(extrinsic_properties.Mr.q > 0)
+    assert np.all(extrinsic_properties.BHmax.q > 0)
+
+
+@pytest.mark.parametrize("model", ["cube50_singlegrain_random_forest_v0.1"])
+def test_Hc_Mr_BHmax_from_Ms_A_K_specify_model(model):
     """Test specifying different models for Hc, Mr, BHmax prediction."""
     Ms = me.Ms(1e6)
     A = me.A(1e-12)
     Ku = me.Ku(1e6)
 
-    extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(
-        Ms, A, Ku, model="cube50_singlegrain_random_forest_v0.1"
-    )
+    extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku, model=model)
 
     assert isinstance(
         extrinsic_properties, mammos_analysis.hysteresis.ExtrinsicProperties
@@ -178,20 +194,20 @@ def test_Hc_Mr_BHmax_from_Ms_A_K_specify_model():
         mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku, model="non-existent-model")
 
 
-def test_Hc_Mr_BHmax_array_inputs():
+def test_Hc_Mr_BHmax_2d_array_inputs():
     """Test that array inputs produce correct shape outputs for predictions."""
-    Ms = me.Ms([1e6, 2e6])
-    A = me.A([1e-12, 2e-12])
-    Ku = me.Ku([1e6, 2e6])
+    Ms = me.Ms([[1e6, 2e6], [3e6, 4e6]])
+    A = me.A([[1e-12, 2e-12], [3e-12, 4e-12]])
+    Ku = me.Ku([[1e6, 2e6], [3e6, 4e6]])
     extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
 
     assert isinstance(
         extrinsic_properties, mammos_analysis.hysteresis.ExtrinsicProperties
     )
 
-    assert np.shape(extrinsic_properties.Hc.value) == (2,)
-    assert np.shape(extrinsic_properties.Mr.value) == (2,)
-    assert np.shape(extrinsic_properties.BHmax.value) == (2,)
+    assert np.shape(extrinsic_properties.Hc.value) == (2, 2)
+    assert np.shape(extrinsic_properties.Mr.value) == (2, 2)
+    assert np.shape(extrinsic_properties.BHmax.value) == (2, 2)
 
     assert np.all(extrinsic_properties.Hc.value > 0)
     assert np.all(extrinsic_properties.Mr.value > 0)
