@@ -44,8 +44,7 @@ def is_hard_magnet_from_Ms_A_K(
     provided, a single classification is returned. If arrays are provided, a
     numpy array with the same shape is returned.
 
-    Different models are available for the prediction. The following list provides an
-    overview:
+    The following models are available for the prediction:
 
     - ``cube50_singlegrain_random_forest_v0.1``: Random forest model trained on
       simulated data for single grain cubic particles with 50 nm edge length with
