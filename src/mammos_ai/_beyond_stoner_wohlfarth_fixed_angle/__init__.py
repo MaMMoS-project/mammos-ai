@@ -172,9 +172,6 @@ def Hc_Mr_BHmax_from_Ms_A_K(
       aligned along an edge of the cube. Further details on the training data
       and model can be found in the
       `model repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
-
-
-
     Args:
        Ms: Spontaneous magnetization.
        A: Exchange stiffness constant.
