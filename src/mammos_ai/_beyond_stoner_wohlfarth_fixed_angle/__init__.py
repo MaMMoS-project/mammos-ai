@@ -20,20 +20,20 @@ import onnxruntime as ort
 MODEL_DIR = Path(__file__).parent
 
 MODELS = {
-    "classifier": MODEL_DIR / "classifier_random_forest_v1.onnx",
-    "soft": MODEL_DIR / "random_forest_soft_v1.onnx",
-    "hard": MODEL_DIR / "random_forest_hard_v1.onnx",
+    "classifier": MODEL_DIR / "classifier_cube50_singlegrain_random_forest_v0.1.onnx",
+    False: MODEL_DIR / "soft_cube50_singlegrain_random_forest_v0.1.onnx",
+    True: MODEL_DIR / "hard_cube50_singlegrain_random_forest_v0.1.onnx",
 }
 
 _SESSION_OPTIONS = ort.SessionOptions()
 _SESSION_OPTIONS.log_severity_level = 3
 
 
-def classify_magnetic_from_Ms_A_K(
+def is_hard_magnet_from_Ms_A_K(
     Ms: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
     A: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
     K1: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
-    model: str = "random-forest-v1",
+    model: str = "cube50_singlegrain_random_forest_v0.1",
 ) -> str | np.ndarray:
     """Classify material as soft or hard magnetic from micromagnetic parameters.
 
@@ -73,7 +73,7 @@ def classify_magnetic_from_Ms_A_K(
     is_scalar = Ms_arr.ndim == 0 or (Ms_arr.ndim == 1 and Ms_arr.size == 1)
 
     match model:
-        case "random-forest-v1":
+        case "cube50_singlegrain_random_forest_v0.1":
             classifier_path = MODELS["classifier"]
         case _:
             raise ValueError(f"Unknown model {model}")
@@ -84,7 +84,7 @@ def classify_magnetic_from_Ms_A_K(
     )
 
     results = session.run(None, {session.get_inputs()[0].name: X})[0]
-    labels = np.where(results == 0, "soft", "hard")
+    labels = np.where(results == 0, False, True)
 
     if is_scalar:
         return labels.item()
@@ -96,7 +96,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     Ms: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
     A: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
     K1: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
-    model: str = "random-forest-v1",
+    model: str = "cube50_singlegrain_random_forest_v0.1",
 ) -> mammos_analysis.hysteresis.ExtrinsicProperties:
     """Predict Hc, Mr and BHmax from micromagnetic properties Ms, A and K1.
 
@@ -144,9 +144,9 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     is_scalar = Ms_arr.ndim == 0 or (Ms_arr.ndim == 1 and Ms_arr.size == 1)
 
     match model:
-        case "random-forest-v1":
+        case "cube50_singlegrain_random_forest_v0.1":
             # 1. Determine class
-            mat_class = classify_magnetic_from_Ms_A_K(Ms, A, K1, model=model)
+            mat_class = is_hard_magnet_from_Ms_A_K(Ms, A, K1, model=model)
 
             # 2. Preprocess
             X_log = np.log1p(
@@ -158,7 +158,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
             y_log = np.empty((X_log.shape[0], 3), dtype=np.float32)
             classes = np.atleast_1d(mat_class).ravel()
 
-            for cls in ["soft", "hard"]:
+            for cls in [False, True]:
                 mask = classes == cls
                 if np.any(mask):
                     # 3. Load regression model

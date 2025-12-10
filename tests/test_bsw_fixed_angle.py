@@ -11,8 +11,8 @@ import mammos_ai
 @pytest.mark.parametrize("Ku", [me.Ku(1e6), me.Ku(1e6).q, me.Ku(1e6).value])
 def test_classify_magnetic_from_Ms_A_K_single_input(Ms, A, Ku):
     """Test classification of magnetic materials from Ms, A, Ku."""
-    classification = mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
-    assert classification in ["soft", "hard"]
+    classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
+    assert classification in [True, False]
 
 
 @pytest.mark.parametrize(
@@ -26,10 +26,10 @@ def test_classify_magnetic_from_Ms_A_K_single_input(Ms, A, Ku):
 )
 def test_classify_magnetic_from_Ms_A_K_1d_array(Ms, A, Ku):
     """Test classification of magnetic materials from Ms, A, Ku."""
-    classification = mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
+    classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
     assert isinstance(classification, np.ndarray)
     assert classification.shape == (2,)
-    assert all(c in ["soft", "hard"] for c in classification)
+    assert all(c in [True, False] for c in classification)
 
 
 @pytest.mark.parametrize(
@@ -58,15 +58,15 @@ def test_classify_magnetic_from_Ms_A_K_1d_array(Ms, A, Ku):
 )
 def test_classify_magnetic_from_Ms_A_K_nd_array(Ms, A, Ku):
     """Test classification of magnetic materials from Ms, A, Ku."""
-    classification = mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
+    classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
     assert isinstance(classification, np.ndarray)
     assert classification.shape == (2, 2)
-    assert all(c in ["soft", "hard"] for c in classification.flatten())
+    assert all(c in [True, False] for c in classification.flatten())
 
 
 def test_classify_magnetic_from_Ms_A_K_zeros():
-    classification = mammos_ai.classify_magnetic_from_Ms_A_K(0, 0, 0)
-    assert classification == "soft"
+    classification = mammos_ai.is_hard_magnet_from_Ms_A_K(0, 0, 0)
+    assert not classification
 
 
 def test_classify_magnetic_from_Ms_A_K_soft():
@@ -74,8 +74,8 @@ def test_classify_magnetic_from_Ms_A_K_soft():
     Ms = me.Ms(1e6)
     A = me.A(1e-12)
     Ku = me.Ku(1e3)
-    classification = mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
-    assert classification == "soft"
+    classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
+    assert not classification
 
 
 def test_classify_magnetic_from_Ms_A_K_hard():
@@ -83,8 +83,8 @@ def test_classify_magnetic_from_Ms_A_K_hard():
     Ms = me.Ms(1e6)
     A = me.A(1e-12)
     Ku = me.Ku(1e8)
-    classification = mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
-    assert classification == "hard"
+    classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
+    assert classification
 
 
 def test_classify_magnetic_from_Ms_A_K_specify_model():
@@ -93,13 +93,13 @@ def test_classify_magnetic_from_Ms_A_K_specify_model():
     A = me.A(1e-12)
     Ku = me.Ku(1e6)
 
-    classification = mammos_ai.classify_magnetic_from_Ms_A_K(
-        Ms, A, Ku, model="random-forest-v1"
+    classification = mammos_ai.is_hard_magnet_from_Ms_A_K(
+        Ms, A, Ku, model="cube50_singlegrain_random_forest_v0.1"
     )
-    assert classification in ["soft", "hard"]
+    assert classification in [True, False]
 
     with pytest.raises(ValueError):
-        mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku, model="non-existent-model")
+        mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku, model="non-existent-model")
 
 
 def test_classify_magnetic_array_inputs():
@@ -108,12 +108,12 @@ def test_classify_magnetic_array_inputs():
     A = me.A([1e-12, 1e-12])
     Ku = me.Ku([1e3, 1e8])
 
-    classification = mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
+    classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
 
     assert isinstance(classification, np.ndarray)
     assert len(classification) == 2
-    assert classification[0] == "soft"
-    assert classification[1] == "hard"
+    assert not classification[0]
+    assert classification[1]
 
 
 def test_classify_magnetic_array_inputs_mixed_lengths():
@@ -123,14 +123,14 @@ def test_classify_magnetic_array_inputs_mixed_lengths():
     Ku = me.Ku([1e3, 1e8])
 
     with pytest.raises(ValueError, match="Input arrays must have the same shape"):
-        mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
+        mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
 
     Ms = me.Ms([1e6])
     A = me.A([1e-12, 2e-12])
     Ku = me.Ku([1e3, 1e8])
 
     with pytest.raises(ValueError, match="Input arrays must have the same shape"):
-        mammos_ai.classify_magnetic_from_Ms_A_K(Ms, A, Ku)
+        mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
 
 
 @pytest.mark.parametrize(
@@ -167,7 +167,7 @@ def test_Hc_Mr_BHmax_from_Ms_A_K_specify_model():
     Ku = me.Ku(1e6)
 
     extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(
-        Ms, A, Ku, model="random-forest-v1"
+        Ms, A, Ku, model="cube50_singlegrain_random_forest_v0.1"
     )
 
     assert isinstance(
