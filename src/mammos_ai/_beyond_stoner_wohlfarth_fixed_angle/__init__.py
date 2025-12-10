@@ -163,8 +163,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     magnetization Mr and maximum energy product BHmax given a set of micromagnetic
     material parameters.
 
-    Different models are available for the prediction. The following list provides an
-    overview:
+    The following models are available for the prediction:
 
     - ``cube50_singlegrain_random_forest_v0.1``: Random forest model trained on
       simulated data for single grain cubic particles with 50 nm edge length with
