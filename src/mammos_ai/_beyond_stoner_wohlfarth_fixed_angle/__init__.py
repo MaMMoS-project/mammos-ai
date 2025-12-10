@@ -107,6 +107,45 @@ def is_hard_magnet_from_Ms_A_K(
         return labels.reshape(original_shape)
 
 
+def _predict_cube50_singlegrain_random_forest_v0_1(
+    Ms, A, K1, Ms_arr, A_arr, K1_arr, original_shape, is_scalar
+):
+    # 1. Determine class
+    mat_class = is_hard_magnet_from_Ms_A_K(
+        Ms, A, K1, model="cube50_singlegrain_random_forest_v0.1"
+    )
+
+    # 2. Preprocess
+    X_log = np.log1p(
+        np.column_stack([Ms_arr.ravel(), A_arr.ravel(), K1_arr.ravel()]).astype(
+            np.float32
+        )
+    )
+
+    y_log = np.empty((X_log.shape[0], 3), dtype=np.float32)
+    classes = np.atleast_1d(mat_class).ravel()
+
+    for cls in [False, True]:
+        mask = classes == cls
+        if np.any(mask):
+            # 3. Load regression model
+            session = ort.InferenceSession(MODELS[cls], _SESSION_OPTIONS)
+            X_subset = X_log[mask]
+
+            # 4. Predict: input name obtained from model expects a shape
+            # (n_samples_in_class, 3) containing [Ms, A, K1], returns 2D
+            # array with shape (n_samples_in_class, 3) containing
+            # [Hc, Mr, BHmax] predictions
+            res = session.run(None, {session.get_inputs()[0].name: X_subset})[0]
+            y_log[mask] = res
+
+    # 5. Postprocess
+    y = np.expm1(y_log)
+
+    # Reshape output as y.shape = (n_samples_in_class, 3)
+    return y[0] if is_scalar else y.reshape(original_shape + (3,))
+
+
 def Hc_Mr_BHmax_from_Ms_A_K(
     Ms: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
     A: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
@@ -175,38 +214,9 @@ def Hc_Mr_BHmax_from_Ms_A_K(
 
     match model:
         case "cube50_singlegrain_random_forest_v0.1":
-            # 1. Determine class
-            mat_class = is_hard_magnet_from_Ms_A_K(Ms, A, K1, model=model)
-
-            # 2. Preprocess
-            X_log = np.log1p(
-                np.column_stack([Ms_arr.ravel(), A_arr.ravel(), K1_arr.ravel()]).astype(
-                    np.float32
-                )
+            y = _predict_cube50_singlegrain_random_forest_v0_1(
+                Ms, A, K1, Ms_arr, A_arr, K1_arr, original_shape, is_scalar
             )
-
-            y_log = np.empty((X_log.shape[0], 3), dtype=np.float32)
-            classes = np.atleast_1d(mat_class).ravel()
-
-            for cls in [False, True]:
-                mask = classes == cls
-                if np.any(mask):
-                    # 3. Load regression model
-                    session = ort.InferenceSession(MODELS[cls], _SESSION_OPTIONS)
-                    X_subset = X_log[mask]
-
-                    # 4. Predict: input name obtained from model expects a shape
-                    # (n_samples_in_class, 3) containing [Ms, A, K1], returns 2D
-                    # array with shape (n_samples_in_class, 3) containing
-                    # [Hc, Mr, BHmax] predictions
-                    res = session.run(None, {session.get_inputs()[0].name: X_subset})[0]
-                    y_log[mask] = res
-
-            # 5. Postprocess
-            y = np.expm1(y_log)
-
-            # Reshape output as y.shape = (n_samples_in_class, 3)
-            y = y[0] if is_scalar else y.reshape(original_shape + (3,))
 
         case _:
             raise ValueError(f"Unknown model {model}")
