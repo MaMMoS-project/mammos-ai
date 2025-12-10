@@ -20,8 +20,8 @@ MODEL_DIR = Path(__file__).parent
 
 MODELS = {
     "classifier": MODEL_DIR / "classifier_cube50_singlegrain_random_forest_v0.1.onnx",
-    False: MODEL_DIR / "soft_cube50_singlegrain_random_forest_v0.1.onnx",
-    True: MODEL_DIR / "hard_cube50_singlegrain_random_forest_v0.1.onnx",
+    "soft": MODEL_DIR / "soft_cube50_singlegrain_random_forest_v0.1.onnx",
+    "hard": MODEL_DIR / "hard_cube50_singlegrain_random_forest_v0.1.onnx",
 }
 
 _SESSION_OPTIONS = ort.SessionOptions()
@@ -133,7 +133,8 @@ def _predict_cube50_singlegrain_random_forest_v0_1(
         mask = classes == cls
         if np.any(mask):
             # 3. Load regression model
-            session = ort.InferenceSession(MODELS[cls], _SESSION_OPTIONS)
+            model_key = "hard" if cls else "soft"
+            session = ort.InferenceSession(MODELS[model_key], _SESSION_OPTIONS)
             X_subset = X_log[mask]
 
             # 4. Predict: input name obtained from model expects a shape
