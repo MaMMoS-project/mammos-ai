@@ -31,6 +31,7 @@ dependencies = [
   "mammos-analysis",
   "mammos-entity",
   "mammos-units",
+  "onnxruntime",
 ]
 
 [project.urls]
