@@ -34,7 +34,7 @@ def is_hard_magnet_from_Ms_A_K(
     A: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
     K1: mammos_entity.Entity | astropy.units.Quantity | numbers.Number | np.ndarray,
     model: str = "cube50_singlegrain_random_forest_v0.1",
-) -> str | np.ndarray:
+) -> bool | np.ndarray:
     """Classify material as soft or hard magnetic from micromagnetic parameters.
 
     This function classifies a magnetic material as either soft or hard magnetic
@@ -51,8 +51,9 @@ def is_hard_magnet_from_Ms_A_K(
        model: AI model used for the classification
 
     Returns:
-       Classification as "soft" or "hard". Returns a string for scalar inputs,
-       or a numpy array with the same shape as the input for array inputs.
+       Classification as False (soft) or True (hard).
+       Returns a boolean for scalar inputs, or a numpy array
+       with the same shape as the input for array inputs.
 
     """
     Ms = me.Ms(Ms, unit=u.A / u.m)
