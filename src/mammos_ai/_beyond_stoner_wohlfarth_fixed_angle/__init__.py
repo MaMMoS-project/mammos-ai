@@ -205,6 +205,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
             # 5. Postprocess
             y = np.expm1(y_log)
 
+            # Reshape output as y.shape = (n_samples_in_class, 3)
             y = y[0] if is_scalar else y.reshape(original_shape + (3,))
 
         case _:
