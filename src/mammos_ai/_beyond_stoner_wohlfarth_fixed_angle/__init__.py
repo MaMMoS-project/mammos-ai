@@ -112,8 +112,12 @@ def is_hard_magnet_from_Ms_A_K(
 
 
 def _predict_cube50_singlegrain_random_forest_v0_1(
-    Ms, A, K1, Ms_arr, A_arr, K1_arr, original_shape, is_scalar
+    Ms, A, K1, original_shape, is_scalar
 ):
+    Ms_arr = np.atleast_1d(Ms.value)
+    A_arr = np.atleast_1d(A.value)
+    K1_arr = np.atleast_1d(K1.value)
+
     # 1. Determine class
     mat_class = is_hard_magnet_from_Ms_A_K(
         Ms, A, K1, model="cube50_singlegrain_random_forest_v0.1"
@@ -207,7 +211,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     match model:
         case "cube50_singlegrain_random_forest_v0.1":
             y = _predict_cube50_singlegrain_random_forest_v0_1(
-                Ms, A, K1, Ms_arr, A_arr, K1_arr, original_shape, is_scalar
+                Ms, A, K1, original_shape, is_scalar
             )
 
         case _:
