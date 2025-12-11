@@ -229,3 +229,53 @@ def test_Hc_Mr_BHmax_array_inputs_mixed_lengths():
 
     with pytest.raises(ValueError, match="Input arrays must have the same shape"):
         mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
+
+
+def test_is_hard_magnet_metadata_default_model():
+    """Test metadata function returns dict with model_name."""
+    metadata = mammos_ai.is_hard_magnet_from_Ms_A_K_metadata()
+
+    assert isinstance(metadata, dict)
+    assert "model_name" in metadata
+    assert metadata["model_name"] == "cube50_singlegrain_random_forest_v0.1"
+
+
+def test_is_hard_magnet_metadata_specified_model():
+    """Test metadata function with explicitly specified model."""
+    metadata = mammos_ai.is_hard_magnet_from_Ms_A_K_metadata(
+        model="cube50_singlegrain_random_forest_v0.1"
+    )
+
+    assert isinstance(metadata, dict)
+    assert "model_name" in metadata
+
+
+def test_is_hard_magnet_metadata_unknown_model():
+    """Test metadata function raises error for unknown model."""
+    with pytest.raises(ValueError, match="Unknown model"):
+        mammos_ai.is_hard_magnet_from_Ms_A_K_metadata(model="non-existent-model")
+
+
+def test_Hc_Mr_BHmax_metadata_default_model():
+    """Test metadata function returns dict with model_name."""
+    metadata = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K_metadata()
+
+    assert isinstance(metadata, dict)
+    assert "model_name" in metadata
+    assert metadata["model_name"] == "cube50_singlegrain_random_forest_v0.1"
+
+
+def test_Hc_Mr_BHmax_metadata_specified_model():
+    """Test metadata function with explicitly specified model."""
+    metadata = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K_metadata(
+        model="cube50_singlegrain_random_forest_v0.1"
+    )
+
+    assert isinstance(metadata, dict)
+    assert "model_name" in metadata
+
+
+def test_Hc_Mr_BHmax_metadata_unknown_model():
+    """Test metadata function raises error for unknown model."""
+    with pytest.raises(ValueError, match="Unknown model"):
+        mammos_ai.Hc_Mr_BHmax_from_Ms_A_K_metadata(model="non-existent-model")
