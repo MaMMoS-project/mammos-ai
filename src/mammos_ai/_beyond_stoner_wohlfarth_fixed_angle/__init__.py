@@ -111,6 +111,39 @@ def is_hard_magnet_from_Ms_A_K(
         return labels.reshape(original_shape)
 
 
+def is_hard_magnet_from_Ms_A_K_metadata(
+    model: str = "cube50_singlegrain_random_forest_v0.1",
+) -> dict:
+    """Get metadata for the specified classification model.
+
+    Args:
+       model: AI model used for the classification
+
+    """
+    match model:
+        case "cube50_singlegrain_random_forest_v0.1":
+            metadata = {
+                "model_name": "cube50_singlegrain_random_forest_v0.1",
+                "description": (
+                    "Random forest model trained on simulated data for single grain "
+                    "cubic particles with 50 nm edge length with the external field "
+                    "applied parallel to the anisotropy axis."
+                ),
+                "training_data_range": {
+                    "Ms": (me.Ms(79.58e3), me.Ms(3.98e6)),
+                    "A": (me.A(1e-13), me.A(1e-11)),
+                    "K": (me.Ku(1e4), me.Ku(1e7)),
+                },
+                "input_parameters": ["Ms (A/m)", "A (J/m)", "K1 (J/m^3)"],
+                "output_classes": {0: "soft magnetic", 1: "hard magnetic"},
+                "source": "https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model",
+            }
+        case _:
+            raise ValueError(f"Unknown model {model}")
+
+    return metadata
+
+
 def _predict_cube50_singlegrain_random_forest_v0_1(
     Ms, A, K1, original_shape, is_scalar
 ):
@@ -230,3 +263,35 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     Mr = me.Mr(Mr_val, "A/m")
     BHmax = me.BHmax(BHmax_val, "J/m3")
     return mammos_analysis.hysteresis.ExtrinsicProperties(Hc=Hc, Mr=Mr, BHmax=BHmax)
+
+
+def Hc_Mr_BHmax_from_Ms_A_K_metadata(
+    model: str = "cube50_singlegrain_random_forest_v0.1",
+) -> dict:
+    """Get metadata for the specified Hc, Mr, BHmax prediction model.
+
+    Args:
+       model: AI model used for the prediction
+
+    """
+    match model:
+        case "cube50_singlegrain_random_forest_v0.1":
+            metadata = {
+                "model_name": "cube50_singlegrain_random_forest_v0.1",
+                "description": (
+                    "Random forest model trained on simulated data for single grain "
+                    "cubic particles with 50 nm edge length with the external field "
+                    "applied parallel to the anisotropy axis."
+                ),
+                "training_data_range": {
+                    "Ms": (me.Ms(79.58e3), me.Ms(3.98e6)),
+                    "A": (me.A(1e-13), me.A(1e-11)),
+                    "K": (me.Ku(1e4), me.Ku(1e7)),
+                },
+                "input_parameters": ["Ms (A/m)", "A (J/m)", "K1 (J/m^3)"],
+                "output_parameters": ["Hc (A/m)", "Mr (A/m)", "BHmax (J/m^3)"],
+                "source": "https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model",
+            }
+        case _:
+            raise ValueError(f"Unknown model {model}")
+    return metadata
