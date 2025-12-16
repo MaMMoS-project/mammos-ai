@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from pprint import pprint
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -113,8 +114,8 @@ def is_hard_magnet_from_Ms_A_K(
 
 def is_hard_magnet_from_Ms_A_K_metadata(
     model: str = "cube50_singlegrain_random_forest_v0.1",
-) -> dict:
-    """Get metadata for the specified classification model.
+):
+    """Print metadata for the specified classification model.
 
     Args:
        model: AI model used for the classification
@@ -130,18 +131,24 @@ def is_hard_magnet_from_Ms_A_K_metadata(
                     "applied parallel to the anisotropy axis."
                 ),
                 "training_data_range": {
-                    "Ms": (me.Ms(79.58e3), me.Ms(3.98e6)),
-                    "A": (me.A(1e-13), me.A(1e-11)),
-                    "K": (me.Ku(1e4), me.Ku(1e7)),
+                    "Ms": [me.Ms(79.58e3), me.Ms(3.98e6)],
+                    "A": [me.A(1e-13), me.A(1e-11)],
+                    "K": [me.Ku(1e4), me.Ku(1e7)],
                 },
                 "input_parameters": ["Ms (A/m)", "A (J/m)", "K1 (J/m^3)"],
                 "output_classes": {0: "soft magnetic", 1: "hard magnetic"},
                 "source": "https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model",
             }
+            original_repr = me.Entity.__repr__
+
+            def override_entity_repr(obj):
+                return str(obj.q)
+
+            me.Entity.__repr__ = override_entity_repr
+            pprint(metadata)
+            me.Entity.__repr__ = original_repr
         case _:
             raise ValueError(f"Unknown model {model}")
-
-    return metadata
 
 
 def _predict_cube50_singlegrain_random_forest_v0_1(
@@ -267,8 +274,8 @@ def Hc_Mr_BHmax_from_Ms_A_K(
 
 def Hc_Mr_BHmax_from_Ms_A_K_metadata(
     model: str = "cube50_singlegrain_random_forest_v0.1",
-) -> dict:
-    """Get metadata for the specified Hc, Mr, BHmax prediction model.
+):
+    """Print metadata for the specified Hc, Mr, BHmax prediction model.
 
     Args:
        model: AI model used for the prediction
@@ -284,14 +291,21 @@ def Hc_Mr_BHmax_from_Ms_A_K_metadata(
                     "applied parallel to the anisotropy axis."
                 ),
                 "training_data_range": {
-                    "Ms": (me.Ms(79.58e3), me.Ms(3.98e6)),
-                    "A": (me.A(1e-13), me.A(1e-11)),
-                    "K": (me.Ku(1e4), me.Ku(1e7)),
+                    "Ms": [me.Ms(79.58e3), me.Ms(3.98e6)],
+                    "A": [me.A(1e-13), me.A(1e-11)],
+                    "K": [me.Ku(1e4), me.Ku(1e7)],
                 },
                 "input_parameters": ["Ms (A/m)", "A (J/m)", "K1 (J/m^3)"],
                 "output_parameters": ["Hc (A/m)", "Mr (A/m)", "BHmax (J/m^3)"],
                 "source": "https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model",
             }
+            original_repr = me.Entity.__repr__
+
+            def override_entity_repr(obj):
+                return str(obj.q)
+
+            me.Entity.__repr__ = override_entity_repr
+            pprint(metadata)
+            me.Entity.__repr__ = original_repr
         case _:
             raise ValueError(f"Unknown model {model}")
-    return metadata
