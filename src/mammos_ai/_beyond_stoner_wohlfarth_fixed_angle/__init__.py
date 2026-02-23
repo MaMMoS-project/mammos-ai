@@ -195,7 +195,7 @@ def is_hard_magnet_from_Ms_A_K(
 
 
 def is_hard_magnet_from_Ms_A_K_metadata(
-    model: str = "cube50_singlegrain_random_forest_v0.1",
+    model: str = "cube50_singlegrain_random_forest_v0.2",
 ) -> dict:
     """Get metadata for the specified classification model.
 
@@ -365,7 +365,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     Ms: mammos_entity.Entity | astropy.units.Quantity | numpy.typing.ArrayLike,
     A: mammos_entity.Entity | astropy.units.Quantity | numpy.typing.ArrayLike,
     K1: mammos_entity.Entity | astropy.units.Quantity | numpy.typing.ArrayLike,
-    model: str = "cube50_singlegrain_random_forest_v0.1",
+    model: str = "cube50_singlegrain_random_forest_v0.2",
 ) -> mammos_analysis.hysteresis.ExtrinsicProperties:
     """Predict Hc, Mr and BHmax from micromagnetic properties Ms, A and K1.
 
@@ -454,7 +454,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
 
 
 def Hc_Mr_BHmax_from_Ms_A_K_metadata(
-    model: str = "cube50_singlegrain_random_forest_v0.1",
+    model: str = "cube50_singlegrain_random_forest_v0.2",
 ) -> dict:
     """Get metadata for the specified Hc, Mr, BHmax prediction model.
 
