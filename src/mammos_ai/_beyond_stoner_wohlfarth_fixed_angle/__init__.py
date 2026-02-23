@@ -19,13 +19,77 @@ import onnxruntime as ort
 MODEL_DIR = Path(__file__).parent
 
 MODELS = {
-    "classifier": MODEL_DIR / "classifier_cube50_singlegrain_random_forest_v0.1.onnx",
-    "soft": MODEL_DIR / "soft_cube50_singlegrain_random_forest_v0.1.onnx",
-    "hard": MODEL_DIR / "hard_cube50_singlegrain_random_forest_v0.1.onnx",
+    "cube50_singlegrain_random_forest_v0.1": {
+        "classifier": MODEL_DIR
+        / "classifier_cube50_singlegrain_random_forest_v0.1.onnx",
+        "soft": MODEL_DIR / "soft_cube50_singlegrain_random_forest_v0.1.onnx",
+        "hard": MODEL_DIR / "hard_cube50_singlegrain_random_forest_v0.1.onnx",
+    },
+    "cube50_singlegrain_random_forest_v0.2": {
+        "classifier": MODEL_DIR
+        / "classifier_cube50_singlegrain_random_forest_v0.2.onnx",
+        "soft": MODEL_DIR / "soft_cube50_singlegrain_random_forest_v0.2.onnx",
+        "hard": MODEL_DIR / "hard_cube50_singlegrain_random_forest_v0.2.onnx",
+    },
 }
 
 _SESSION_OPTIONS = ort.SessionOptions()
 _SESSION_OPTIONS.log_severity_level = 3
+
+
+def _in_training_range(Ms_arr, A_arr, K1_arr, model):
+    """Check element-wise if inputs are within the training data range.
+
+    Parameters are numpy arrays in SI units (A/m, J/m, J/m^3).
+    Returns a boolean array with the same shape as the inputs.
+    """
+    match model:
+        case "cube50_singlegrain_random_forest_v0.1":
+            Ms_lo = me.Ms(
+                (0.1 * u.T).to(u.A / u.m, equivalencies=u.magnetic_flux_field())
+            )
+            Ms_hi = me.Ms(
+                (5.0 * u.T).to(u.A / u.m, equivalencies=u.magnetic_flux_field())
+            )
+            A_lo = me.A(1e-13)
+            A_hi = me.A(1e-11)
+            K_lo = me.Ku(1e4)
+            K_hi = me.Ku(1e7)
+            check_length_constraints = False
+        case "cube50_singlegrain_random_forest_v0.2":
+            Ms_lo = me.Ms(
+                (0.1 * u.T).to(u.A / u.m, equivalencies=u.magnetic_flux_field())
+            )
+            Ms_hi = me.Ms(
+                (5.0 * u.T).to(u.A / u.m, equivalencies=u.magnetic_flux_field())
+            )
+            A_lo = me.A(1e-13)
+            A_hi = me.A(1e-11)
+            K_lo = me.Ku(1e4)
+            K_hi = me.Ku(1e7)
+            check_length_constraints = True
+        case _:
+            raise ValueError(f"Unknown model {model}")
+
+    mask = (
+        (Ms_arr >= Ms_lo.value)
+        & (Ms_arr <= Ms_hi.value)
+        & (A_arr >= A_lo.value)
+        & (A_arr <= A_hi.value)
+        & (K1_arr >= K_lo.value)
+        & (K1_arr <= K_hi.value)
+    )
+
+    if check_length_constraints:
+        # Exchange length and domain wall width must be >= 1 nm,
+        # matching the training data generation constraints.
+        with np.errstate(divide="ignore", invalid="ignore"):
+            l_A = np.sqrt(2 * A_arr / (u.constants.mu0.value * Ms_arr**2))
+            l_K = np.sqrt(A_arr / K1_arr)
+        threshold = 1e-9  # 1 nm
+        mask &= (l_A >= threshold) & (l_K >= threshold)
+
+    return mask
 
 
 def is_hard_magnet_from_Ms_A_K(
@@ -51,6 +115,10 @@ def is_hard_magnet_from_Ms_A_K(
       aligned along an edge of the cube. Further details on the training data
       and model can be found in the
       `model repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
+
+    - ``cube50_singlegrain_random_forest_v0.2``: Random forest model with the same
+      geometry as v0.1 but trained on data that additionally enforces exchange length
+      and domain wall width >= 1 nm as training data generation constraints.
 
     Args:
        Ms: Spontaneous magnetization.
@@ -89,7 +157,13 @@ def is_hard_magnet_from_Ms_A_K(
 
     match model:
         case "cube50_singlegrain_random_forest_v0.1":
-            classifier_path = MODELS["classifier"]
+            classifier_path = MODELS["cube50_singlegrain_random_forest_v0.1"][
+                "classifier"
+            ]
+        case "cube50_singlegrain_random_forest_v0.2":
+            classifier_path = MODELS["cube50_singlegrain_random_forest_v0.2"][
+                "classifier"
+            ]
         case _:
             raise ValueError(f"Unknown model {model}")
 
@@ -104,6 +178,15 @@ def is_hard_magnet_from_Ms_A_K(
     # (0=soft magnetic, 1=hard magnetic)
     results = session.run(None, {session.get_inputs()[0].name: X})[0]
     labels = np.where(results == 0, False, True)
+
+    # Mask out-of-range inputs with NaN
+    range_mask = _in_training_range(Ms_arr, A_arr, K1_arr, model)
+    if not np.all(range_mask):
+        if is_scalar:
+            return np.nan
+        labels = labels.astype(float)
+        labels[~range_mask.ravel()] = np.nan
+        return labels.reshape(original_shape)
 
     if is_scalar:
         return labels.item()
@@ -130,7 +213,47 @@ def is_hard_magnet_from_Ms_A_K_metadata(
                     "applied parallel to the anisotropy axis."
                 ),
                 "training_data_range": {
-                    "Ms": (me.Ms(79.58e3), me.Ms(3.98e6)),
+                    "Ms": (
+                        me.Ms(
+                            (0.1 * u.T).to(
+                                u.A / u.m, equivalencies=u.magnetic_flux_field()
+                            )
+                        ),
+                        me.Ms(
+                            (5.0 * u.T).to(
+                                u.A / u.m, equivalencies=u.magnetic_flux_field()
+                            )
+                        ),
+                    ),
+                    "A": (me.A(1e-13), me.A(1e-11)),
+                    "K": (me.Ku(1e4), me.Ku(1e7)),
+                },
+                "input_parameters": ["Ms (A/m)", "A (J/m)", "K1 (J/m^3)"],
+                "output_classes": {0: "soft magnetic", 1: "hard magnetic"},
+                "source": "https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model",
+            }
+        case "cube50_singlegrain_random_forest_v0.2":
+            metadata = {
+                "model_name": "cube50_singlegrain_random_forest_v0.2",
+                "description": (
+                    "Random forest model trained on simulated data for single grain "
+                    "cubic particles with 50 nm edge length with the external field "
+                    "applied parallel to the anisotropy axis. Training enforces "
+                    "exchange length and domain wall width >= 1 nm."
+                ),
+                "training_data_range": {
+                    "Ms": (
+                        me.Ms(
+                            (0.1 * u.T).to(
+                                u.A / u.m, equivalencies=u.magnetic_flux_field()
+                            )
+                        ),
+                        me.Ms(
+                            (5.0 * u.T).to(
+                                u.A / u.m, equivalencies=u.magnetic_flux_field()
+                            )
+                        ),
+                    ),
                     "A": (me.A(1e-13), me.A(1e-11)),
                     "K": (me.Ku(1e4), me.Ku(1e7)),
                 },
@@ -171,7 +294,57 @@ def _predict_cube50_singlegrain_random_forest_v0_1(
         if np.any(mask):
             # 3. Load regression model
             model_key = "hard" if cls else "soft"
-            session = ort.InferenceSession(MODELS[model_key], _SESSION_OPTIONS)
+            session = ort.InferenceSession(
+                MODELS["cube50_singlegrain_random_forest_v0.1"][model_key],
+                _SESSION_OPTIONS,
+            )
+            X_subset = X_log[mask]
+
+            # 4. Predict: input name obtained from model expects a shape
+            # (n_samples_in_class, 3) containing [Ms, A, K1], returns 2D
+            # array with shape (n_samples_in_class, 3) containing
+            # [Hc, Mr, BHmax] predictions
+            res = session.run(None, {session.get_inputs()[0].name: X_subset})[0]
+            y_log[mask] = res
+
+    # 5. Postprocess
+    y = np.expm1(y_log)
+
+    # Reshape output as y.shape = (n_samples_in_class, 3)
+    return y[0] if is_scalar else y.reshape(original_shape + (3,))
+
+
+def _predict_cube50_singlegrain_random_forest_v0_2(
+    Ms, A, K1, original_shape, is_scalar
+):
+    Ms_arr = np.atleast_1d(Ms.value)
+    A_arr = np.atleast_1d(A.value)
+    K1_arr = np.atleast_1d(K1.value)
+
+    # 1. Determine class
+    mat_class = is_hard_magnet_from_Ms_A_K(
+        Ms, A, K1, model="cube50_singlegrain_random_forest_v0.2"
+    )
+
+    # 2. Preprocess
+    X_log = np.log1p(
+        np.column_stack([Ms_arr.ravel(), A_arr.ravel(), K1_arr.ravel()]).astype(
+            np.float32
+        )
+    )
+
+    y_log = np.empty((X_log.shape[0], 3), dtype=np.float32)
+    classes = np.atleast_1d(mat_class).ravel()
+
+    for cls in [False, True]:
+        mask = classes == cls
+        if np.any(mask):
+            # 3. Load regression model
+            model_key = "hard" if cls else "soft"
+            session = ort.InferenceSession(
+                MODELS["cube50_singlegrain_random_forest_v0.2"][model_key],
+                _SESSION_OPTIONS,
+            )
             X_subset = X_log[mask]
 
             # 4. Predict: input name obtained from model expects a shape
@@ -208,6 +381,10 @@ def Hc_Mr_BHmax_from_Ms_A_K(
       aligned along an edge of the cube. Further details on the training data
       and model can be found in the
       `model repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
+
+    - ``cube50_singlegrain_random_forest_v0.2``: Random forest model with the same
+      geometry as v0.1 but trained on data that additionally enforces exchange length
+      and domain wall width >= 1 nm as training data generation constraints.
 
     Args:
        Ms: Spontaneous magnetization.
@@ -246,9 +423,20 @@ def Hc_Mr_BHmax_from_Ms_A_K(
             y = _predict_cube50_singlegrain_random_forest_v0_1(
                 Ms, A, K1, original_shape, is_scalar
             )
-
+        case "cube50_singlegrain_random_forest_v0.2":
+            y = _predict_cube50_singlegrain_random_forest_v0_2(
+                Ms, A, K1, original_shape, is_scalar
+            )
         case _:
             raise ValueError(f"Unknown model {model}")
+
+    # Mask out-of-range inputs with NaN
+    range_mask = _in_training_range(Ms_arr, A_arr, K1_arr, model)
+    if not np.all(range_mask):
+        if is_scalar:
+            y = np.full(3, np.nan)
+        else:
+            y[~range_mask] = np.nan
 
     if is_scalar:
         Hc_val = y[0]
@@ -284,7 +472,47 @@ def Hc_Mr_BHmax_from_Ms_A_K_metadata(
                     "applied parallel to the anisotropy axis."
                 ),
                 "training_data_range": {
-                    "Ms": (me.Ms(79.58e3), me.Ms(3.98e6)),
+                    "Ms": (
+                        me.Ms(
+                            (0.1 * u.T).to(
+                                u.A / u.m, equivalencies=u.magnetic_flux_field()
+                            )
+                        ),
+                        me.Ms(
+                            (5.0 * u.T).to(
+                                u.A / u.m, equivalencies=u.magnetic_flux_field()
+                            )
+                        ),
+                    ),
+                    "A": (me.A(1e-13), me.A(1e-11)),
+                    "K": (me.Ku(1e4), me.Ku(1e7)),
+                },
+                "input_parameters": ["Ms (A/m)", "A (J/m)", "K1 (J/m^3)"],
+                "output_parameters": ["Hc (A/m)", "Mr (A/m)", "BHmax (J/m^3)"],
+                "source": "https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model",
+            }
+        case "cube50_singlegrain_random_forest_v0.2":
+            metadata = {
+                "model_name": "cube50_singlegrain_random_forest_v0.2",
+                "description": (
+                    "Random forest model trained on simulated data for single grain "
+                    "cubic particles with 50 nm edge length with the external field "
+                    "applied parallel to the anisotropy axis. Training enforces "
+                    "exchange length and domain wall width >= 1 nm."
+                ),
+                "training_data_range": {
+                    "Ms": (
+                        me.Ms(
+                            (0.1 * u.T).to(
+                                u.A / u.m, equivalencies=u.magnetic_flux_field()
+                            )
+                        ),
+                        me.Ms(
+                            (5.0 * u.T).to(
+                                u.A / u.m, equivalencies=u.magnetic_flux_field()
+                            )
+                        ),
+                    ),
                     "A": (me.A(1e-13), me.A(1e-11)),
                     "K": (me.Ku(1e4), me.Ku(1e7)),
                 },
