@@ -6,13 +6,12 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import astropy.units
     import mammos_entity
+    import mammos_units
     import numpy
 
 import mammos_analysis
 import mammos_entity as me
-import mammos_units as u
 import numpy as np
 import onnxruntime as ort
 
@@ -29,16 +28,16 @@ _SESSION_OPTIONS.log_severity_level = 3
 
 
 def is_hard_magnet_from_Ms_A_K(
-    Ms: mammos_entity.Entity | astropy.units.Quantity | numpy.typing.ArrayLike,
-    A: mammos_entity.Entity | astropy.units.Quantity | numpy.typing.ArrayLike,
-    K1: mammos_entity.Entity | astropy.units.Quantity | numpy.typing.ArrayLike,
+    Ms: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
+    A: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
+    K1: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     model: str = "cube50_singlegrain_random_forest_v0.1",
-) -> bool | np.ndarray:
+) -> bool | numpy.ndarray:
     """Classify material as soft or hard magnetic from micromagnetic parameters.
 
     This function classifies a magnetic material as either soft or hard magnetic
     based on its micromagnetic parameters spontaneous magnetization Ms, exchange
-    stiffness constant A and uniaxial anisotropy constant K1.
+    /mammos/index.html# stiffness constant A and uniaxial anisotropy constant K1.
     The shape of the input parameters needs to be the same. If single values are
     provided, a single classification is returned. If arrays are provided, a
     numpy array with the same shape is returned.
@@ -53,26 +52,32 @@ def is_hard_magnet_from_Ms_A_K(
       `model repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
 
     Args:
-       Ms: Spontaneous magnetization.
-       A: Exchange stiffness constant.
-       K1: Uniaxial anisotropy constant.
-       model: AI model used for the classification
+        Ms: Spontaneous magnetization :entity:`SpontaneousMagnetization`.
+        A: Exchange stiffness constant :entity:`ExchangeStiffnessConstant`.
+        K1: Uniaxial anisotropy constant :entity:`UniaxialAnisotropyConstant`.
+        model: AI model used for the classification
 
     Returns:
-       Classification as False (soft) or True (hard).
-       Returns a boolean for scalar inputs, or a numpy array
-       with the same shape as the input for array inputs.
+        Classification as False (soft) or True (hard).
+        Returns a boolean for scalar inputs, or a numpy array
+        with the same shape as the input for array inputs.
 
     Examples:
-    >>> import mammos_ai
-    >>> import mammos_entity as me
-    >>> mammos_ai.is_hard_magnet_from_Ms_A_K(me.Ms(1e6), me.A(1e-12), me.Ku(1e6))
-    True
+        >>> import mammos_ai
+        >>> import mammos_entity as me
+        >>> mammos_ai.is_hard_magnet_from_Ms_A_K(me.Ms(1e6), me.A(1e-12), me.Ku(1e6))
+        True
 
     """
-    Ms = me.Ms(Ms, unit=u.A / u.m)
-    A = me.A(A, unit=u.J / u.m)
-    K1 = me.Ku(K1, unit=u.J / u.m**3)
+    Ms = me._entity.from_compatible(
+        "SpontaneousMagnetization", "A/m", Ms=Ms, enforce_unit=True
+    )
+    A = me._entity.from_compatible(
+        "ExchangeStiffnessConstant", "J/m", A=A, enforce_unit=True
+    )
+    K1 = me._entity.from_compatible(
+        "UniaxialAnisotropyConstant", "J/m^3", K1=K1, enforce_unit=True
+    )
 
     Ms_arr = np.atleast_1d(Ms.value)
     A_arr = np.atleast_1d(A.value)
@@ -189,9 +194,9 @@ def _predict_cube50_singlegrain_random_forest_v0_1(
 
 
 def Hc_Mr_BHmax_from_Ms_A_K(
-    Ms: mammos_entity.Entity | astropy.units.Quantity | numpy.typing.ArrayLike,
-    A: mammos_entity.Entity | astropy.units.Quantity | numpy.typing.ArrayLike,
-    K1: mammos_entity.Entity | astropy.units.Quantity | numpy.typing.ArrayLike,
+    Ms: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
+    A: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
+    K1: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     model: str = "cube50_singlegrain_random_forest_v0.1",
 ) -> mammos_analysis.hysteresis.ExtrinsicProperties:
     """Predict Hc, Mr and BHmax from micromagnetic properties Ms, A and K1.
@@ -210,23 +215,29 @@ def Hc_Mr_BHmax_from_Ms_A_K(
       `model repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
 
     Args:
-       Ms: Spontaneous magnetization.
-       A: Exchange stiffness constant.
-       K1: Uniaxial anisotropy constant.
-       model: AI model used for the prediction
+        Ms: Spontaneous magnetization :entity:`SpontaneousMagnetization`.
+        A: Exchange stiffness constant :entity:`ExchangeStiffnessConstant`.
+        K1: Uniaxial anisotropy constant :entity:`UniaxialAnisotropyConstant`.
+        model: AI model used for the prediction
 
     Returns:
-       An object containing extrinsic properties Hc, Mr, BHmax
+        An object containing extrinsic properties Hc, Mr, BHmax
 
     Examples:
-    >>> import mammos_ai
-    >>> import mammos_entity as me
-    >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(me.Ms(1e6), me.A(1e-12), me.Ku(1e6))
-    ExtrinsicProperties(Hc=..., Mr=..., BHmax=...)
+        >>> import mammos_ai
+        >>> import mammos_entity as me
+        >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(me.Ms(1e6), me.A(1e-12), me.Ku(1e6))
+        ExtrinsicProperties(Hc=..., Mr=..., BHmax=...)
     """
-    Ms = me.Ms(Ms, unit=u.A / u.m)
-    A = me.A(A, unit=u.J / u.m)
-    K1 = me.Ku(K1, unit=u.J / u.m**3)
+    Ms = me._entity.from_compatible(
+        "SpontaneousMagnetization", "A/m", Ms=Ms, enforce_unit=True
+    )
+    A = me._entity.from_compatible(
+        "ExchangeStiffnessConstant", "J/m", A=A, enforce_unit=True
+    )
+    K1 = me._entity.from_compatible(
+        "UniaxialAnisotropyConstant", "J/m^3", K1=K1, enforce_unit=True
+    )
 
     Ms_arr = np.atleast_1d(Ms.value)
     A_arr = np.atleast_1d(A.value)
