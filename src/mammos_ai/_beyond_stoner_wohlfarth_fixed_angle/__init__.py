@@ -225,9 +225,15 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(me.Ms(1e6), me.A(1e-12), me.Ku(1e6))
     ExtrinsicProperties(Hc=..., Mr=..., BHmax=...)
     """
-    Ms = me._entity.from_compatible("SpontaneousMagnetization", "A/m", Ms=Ms)
-    A = me._entity.from_compatible("ExchangeStiffnessConstant", "J/m", A=A)
-    K1 = me._entity.from_compatible("UniaxialAnisotropyConstant", "J/m^3", Ku=K1)
+    Ms = me._entity.from_compatible(
+        "SpontaneousMagnetization", "A/m", Ms=Ms, enforce_unit=True
+    )
+    A = me._entity.from_compatible(
+        "ExchangeStiffnessConstant", "J/m", A=A, enforce_unit=True
+    )
+    K1 = me._entity.from_compatible(
+        "UniaxialAnisotropyConstant", "J/m^3", K1=K1, enforce_unit=True
+    )
 
     Ms_arr = np.atleast_1d(Ms.value)
     A_arr = np.atleast_1d(A.value)
