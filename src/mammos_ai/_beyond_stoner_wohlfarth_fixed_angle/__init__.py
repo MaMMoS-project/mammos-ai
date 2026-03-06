@@ -211,19 +211,19 @@ def Hc_Mr_BHmax_from_Ms_A_K(
       `model repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
 
     Args:
-       Ms: Spontaneous magnetization :entity:`SpontaneousMagnetization`.
-       A: Exchange stiffness constant :entity:`ExchangeStiffnessConstant`.
-       K1: Uniaxial anisotropy constant :entity:`UniaxialAnisotropyConstant`.
-       model: AI model used for the prediction
+        Ms: Spontaneous magnetization :entity:`SpontaneousMagnetization`.
+        A: Exchange stiffness constant :entity:`ExchangeStiffnessConstant`.
+        K1: Uniaxial anisotropy constant :entity:`UniaxialAnisotropyConstant`.
+        model: AI model used for the prediction
 
     Returns:
-       An object containing extrinsic properties Hc, Mr, BHmax
+        An object containing extrinsic properties Hc, Mr, BHmax
 
     Examples:
-    >>> import mammos_ai
-    >>> import mammos_entity as me
-    >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(me.Ms(1e6), me.A(1e-12), me.Ku(1e6))
-    ExtrinsicProperties(Hc=..., Mr=..., BHmax=...)
+        >>> import mammos_ai
+        >>> import mammos_entity as me
+        >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(me.Ms(1e6), me.A(1e-12), me.Ku(1e6))
+        ExtrinsicProperties(Hc=..., Mr=..., BHmax=...)
     """
     Ms = me._entity.from_compatible(
         "SpontaneousMagnetization", "A/m", Ms=Ms, enforce_unit=True
