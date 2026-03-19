@@ -32,12 +32,12 @@ def is_hard_magnet_from_Ms_A_K(
     A: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     K1: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     model: str = "cube50_singlegrain_random_forest_v0.1",
-) -> bool | numpy.ndarray:
+) -> bool | np.ndarray:
     """Classify material as soft or hard magnetic from micromagnetic parameters.
 
     This function classifies a magnetic material as either soft or hard magnetic
     based on its micromagnetic parameters spontaneous magnetization Ms, exchange
-    /mammos/index.html# stiffness constant A and uniaxial anisotropy constant K1.
+    stiffness constant A and uniaxial anisotropy constant K1.
     The shape of the input parameters needs to be the same. If single values are
     provided, a single classification is returned. If arrays are provided, a
     numpy array with the same shape is returned.
