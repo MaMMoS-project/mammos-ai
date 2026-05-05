@@ -52,9 +52,12 @@ def is_hard_magnet_from_Ms_A_K(
       `model repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
 
     Args:
-        Ms: Spontaneous magnetization :entity:`SpontaneousMagnetization`.
-        A: Exchange stiffness constant :entity:`ExchangeStiffnessConstant`.
-        K1: Uniaxial anisotropy constant :entity:`UniaxialAnisotropyConstant`.
+        Ms: :entity:`SpontaneousMagnetization`.
+            If no unit is provided, values are interpreted as 'A/m'.
+        A: :entity:`ExchangeStiffnessConstant`.
+            If no unit is provided, values are interpreted as 'J/m'.
+        K1: :entity:`UniaxialAnisotropyConstant`.
+            If no unit is provided, values are interpreted as 'J/m^3'.
         model: AI model used for the classification
 
     Returns:
@@ -215,9 +218,12 @@ def Hc_Mr_BHmax_from_Ms_A_K(
       `model repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
 
     Args:
-        Ms: Spontaneous magnetization :entity:`SpontaneousMagnetization`.
-        A: Exchange stiffness constant :entity:`ExchangeStiffnessConstant`.
-        K1: Uniaxial anisotropy constant :entity:`UniaxialAnisotropyConstant`.
+        Ms: :entity:`SpontaneousMagnetization`.
+            If no unit is provided, values are interpreted as 'A/m'.
+        A: :entity:`ExchangeStiffnessConstant`.
+            If no unit is provided, values are interpreted as 'J/m'.
+        K1: :entity:`UniaxialAnisotropyConstant`.
+            If no unit is provided, values are interpreted as 'J/m^3'.
         model: AI model used for the prediction
 
     Returns:
