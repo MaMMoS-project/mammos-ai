@@ -91,6 +91,10 @@ def is_hard_magnet_from_Ms_A_K(
 
     """
     m = _choose_model(model)
+    if not hasattr(m, "is_hard_magnet"):
+        raise NotImplementedError(
+            f"Model {model} cannot classify materials as hard or soft."
+        )
     Ms_arr, A_arr, K1_arr, original_shape = prepare_Ms_A_K1(Ms, A, K1)
     labels = m.is_hard_magnet(Ms_arr, A_arr, K1_arr)
     if original_shape == (1,):
@@ -107,7 +111,12 @@ def is_hard_magnet_from_Ms_A_K_metadata(
        model: AI model used for the classification
 
     """
-    return _choose_model(model).CLASSIFY_METADATA
+    m = _choose_model(model)
+    if not hasattr(m, "CLASSIFY_METADATA"):
+        raise NotImplementedError(
+            f"Model {model} does not provide classification metadata."
+        )
+    return m.CLASSIFY_METADATA
 
 
 def Hc_Mr_BHmax_from_Ms_A_K(
@@ -150,6 +159,8 @@ def Hc_Mr_BHmax_from_Ms_A_K(
         ExtrinsicProperties(Hc=..., Mr=..., BHmax=...)
     """
     m = _choose_model(model)
+    if not hasattr(m, "predict_extrinsic"):
+        raise NotImplementedError(f"Model {model} cannot predict Hc, Mr or BHmax.")
     Ms_arr, A_arr, K1_arr, original_shape = prepare_Ms_A_K1(Ms, A, K1)
     y = m.predict_extrinsic(Ms_arr, A_arr, K1_arr)
     if original_shape == (1,):
@@ -175,4 +186,9 @@ def Hc_Mr_BHmax_from_Ms_A_K_metadata(
        model: AI model used for the prediction
 
     """
-    return _choose_model(model).PREDICT_METADATA
+    m = _choose_model(model)
+    if not hasattr(m, "PREDICT_METADATA"):
+        raise NotImplementedError(
+            f"Model {model} does not provide Hc, Mr or BHmax prediction metadata."
+        )
+    return m.PREDICT_METADATA
