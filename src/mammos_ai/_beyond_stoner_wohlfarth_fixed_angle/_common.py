@@ -28,7 +28,7 @@ def prepare_Ms_A_K1(
     Ms: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     A: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     K1: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, tuple[int, ...], bool]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, tuple[int, ...]]:
     """Turn (Ms, A, K1) inputs into numpy value arrays in SI units.
 
     Args:
@@ -40,10 +40,10 @@ def prepare_Ms_A_K1(
             If no unit is provided, values are interpreted as 'J/m^3'.
 
     Returns:
-        ``(Ms_arr, A_arr, K1_arr, original_shape, is_scalar)``. The arrays
-        are at least 1-D and use SI units. ``original_shape`` is the shape
-        after ``np.atleast_1d``. ``is_scalar`` is true when the user passed
-        a single value.
+        ``(Ms_arr, A_arr, K1_arr, original_shape)``. The arrays are at least
+        1-D and use SI units. ``original_shape`` is the shape after
+        ``np.atleast_1d``; a shape of ``(1,)`` means the user passed a single
+        value.
 
     Raises:
         ValueError: if the three inputs do not have the same shape.
@@ -68,6 +68,4 @@ def prepare_Ms_A_K1(
             f"A: {A_arr.shape}, Ku: {K1_arr.shape}"
         )
 
-    original_shape = Ms_arr.shape
-    is_scalar = Ms_arr.ndim == 0 or (Ms_arr.ndim == 1 and Ms_arr.size == 1)
-    return Ms_arr, A_arr, K1_arr, original_shape, is_scalar
+    return Ms_arr, A_arr, K1_arr, Ms_arr.shape

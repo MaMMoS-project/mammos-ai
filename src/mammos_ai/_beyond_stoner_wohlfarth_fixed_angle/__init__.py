@@ -91,9 +91,9 @@ def is_hard_magnet_from_Ms_A_K(
 
     """
     m = _choose_model(model)
-    Ms_arr, A_arr, K1_arr, original_shape, is_scalar = prepare_Ms_A_K1(Ms, A, K1)
+    Ms_arr, A_arr, K1_arr, original_shape = prepare_Ms_A_K1(Ms, A, K1)
     labels = m.is_hard_magnet(Ms_arr, A_arr, K1_arr)
-    if is_scalar:
+    if original_shape == (1,):
         return labels.item()
     return labels.reshape(original_shape)
 
@@ -150,9 +150,9 @@ def Hc_Mr_BHmax_from_Ms_A_K(
         ExtrinsicProperties(Hc=..., Mr=..., BHmax=...)
     """
     m = _choose_model(model)
-    Ms_arr, A_arr, K1_arr, original_shape, is_scalar = prepare_Ms_A_K1(Ms, A, K1)
+    Ms_arr, A_arr, K1_arr, original_shape = prepare_Ms_A_K1(Ms, A, K1)
     y = m.predict_extrinsic(Ms_arr, A_arr, K1_arr)
-    if is_scalar:
+    if original_shape == (1,):
         Hc_val, Mr_val, BHmax_val = y[0]
     else:
         y = y.reshape(original_shape + (3,))
