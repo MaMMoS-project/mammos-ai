@@ -19,11 +19,11 @@ if TYPE_CHECKING:
 import mammos_analysis
 import mammos_entity as me
 
-from . import cube50_singlegrain_random_forest_v0_1 as _cube50_v0_1
+from . import cube50_singlegrain_random_forest_v0_1
 from ._common import prepare_Ms_A_K1
 
 _REGISTRY = {
-    "cube50_singlegrain_random_forest_v0.1": _cube50_v0_1,
+    "cube50_singlegrain_random_forest_v0.1": cube50_singlegrain_random_forest_v0_1,
 }
 
 
