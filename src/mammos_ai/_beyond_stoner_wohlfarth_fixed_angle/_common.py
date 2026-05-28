@@ -1,11 +1,4 @@
-"""Shared helpers used by all models in this subpackage.
-
-Each model lives in its own module and provides ``NAME``, metadata dicts,
-``is_hard_magnet`` and ``predict_extrinsic``. The public functions in
-``__init__`` prepare the inputs, find the requested model, and call it.
-This module holds the parts that are the same for every model that takes
-``(Ms, A, K1)`` as input.
-"""
+"""Shared helpers used by all models in this subpackage."""
 
 from __future__ import annotations
 
