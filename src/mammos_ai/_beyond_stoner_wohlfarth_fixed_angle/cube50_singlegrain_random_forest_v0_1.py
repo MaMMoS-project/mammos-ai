@@ -111,10 +111,10 @@ def predict_extrinsic(
 
     y_log = np.empty((X_log.shape[0], 3), dtype=np.float32)
     classes = np.atleast_1d(mat_class).ravel()
-    for cls in (False, True):
-        mask = classes == cls
+    for is_hard in (False, True):
+        mask = classes == is_hard
         if np.any(mask):
-            path = PATHS["hard" if cls else "soft"]
+            path = PATHS["hard" if is_hard else "soft"]
             session = ort.InferenceSession(path, SESSION_OPTIONS)
             X_subset = X_log[mask]
             # Regressor expects (n, 3) [Ms, A, K1]; returns (n, 3)
