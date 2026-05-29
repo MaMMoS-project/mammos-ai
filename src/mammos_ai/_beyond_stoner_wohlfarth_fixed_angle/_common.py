@@ -21,7 +21,7 @@ def prepare_Ms_A_K1(
     Ms: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     A: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     K1: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, tuple[int, ...]]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Turn (Ms, A, K1) inputs into numpy value arrays in SI units.
 
     Args:
@@ -33,10 +33,7 @@ def prepare_Ms_A_K1(
             If no unit is provided, values are interpreted as 'J/m^3'.
 
     Returns:
-        ``(Ms_arr, A_arr, K1_arr, original_shape)``. The arrays are at least
-        1-D and use SI units. ``original_shape`` is the shape after
-        ``np.atleast_1d``; a shape of ``(1,)`` means the user passed a single
-        value.
+        ``(Ms_arr, A_arr, K1_arr)``. The arrays use SI units.
 
     Raises:
         ValueError: if the three inputs do not have the same shape.
@@ -51,9 +48,9 @@ def prepare_Ms_A_K1(
         "UniaxialAnisotropyConstant", "J/m^3", K1=K1, enforce_unit=True
     )
 
-    Ms_arr = np.atleast_1d(Ms.value)
-    A_arr = np.atleast_1d(A.value)
-    K1_arr = np.atleast_1d(K1.value)
+    Ms_arr = Ms.value
+    A_arr = A.value
+    K1_arr = K1.value
 
     if not (Ms_arr.shape == A_arr.shape == K1_arr.shape):
         raise ValueError(
@@ -61,4 +58,4 @@ def prepare_Ms_A_K1(
             f"A: {A_arr.shape}, Ku: {K1_arr.shape}"
         )
 
-    return Ms_arr, A_arr, K1_arr, Ms_arr.shape
+    return Ms_arr, A_arr, K1_arr

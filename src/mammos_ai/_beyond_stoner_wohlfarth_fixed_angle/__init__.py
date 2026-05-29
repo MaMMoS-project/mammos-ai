@@ -95,11 +95,9 @@ def is_hard_magnet_from_Ms_A_K(
         raise NotImplementedError(
             f"Model {model} cannot classify materials as hard or soft."
         )
-    Ms_arr, A_arr, K1_arr, original_shape = prepare_Ms_A_K1(Ms, A, K1)
+    Ms_arr, A_arr, K1_arr = prepare_Ms_A_K1(Ms, A, K1)
     labels = m.is_hard_magnet(Ms_arr, A_arr, K1_arr)
-    if original_shape == (1,):
-        return labels.item()
-    return labels.reshape(original_shape)
+    return labels
 
 
 def is_hard_magnet_from_Ms_A_K_metadata(
@@ -161,15 +159,8 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     m = _choose_model(model)
     if not hasattr(m, "predict_extrinsic"):
         raise NotImplementedError(f"Model {model} cannot predict Hc, Mr or BHmax.")
-    Ms_arr, A_arr, K1_arr, original_shape = prepare_Ms_A_K1(Ms, A, K1)
-    y = m.predict_extrinsic(Ms_arr, A_arr, K1_arr)
-    if original_shape == (1,):
-        Hc_val, Mr_val, BHmax_val = y[0]
-    else:
-        y = y.reshape(original_shape + (3,))
-        Hc_val = y[..., 0]
-        Mr_val = y[..., 1]
-        BHmax_val = y[..., 2]
+    Ms_arr, A_arr, K1_arr = prepare_Ms_A_K1(Ms, A, K1)
+    Hc_val, Mr_val, BHmax_val = m.predict_extrinsic(Ms_arr, A_arr, K1_arr)
     return mammos_analysis.hysteresis.ExtrinsicProperties(
         Hc=me.Hc(Hc_val, "A/m"),
         Mr=me.Mr(Mr_val, "A/m"),

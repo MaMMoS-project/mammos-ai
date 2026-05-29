@@ -84,7 +84,7 @@ def is_hard_magnet(
     # The classifier expects input shape (n_samples, 3) containing [Ms, A, K1]
     # and returns a 1-D array of class labels (0=soft, 1=hard).
     results = session.run(None, {session.get_inputs()[0].name: X})[0]
-    return np.where(results == 0, False, True)
+    return np.where(results == 0, False, True).reshape(Ms_arr.shape)
 
 
 def predict_extrinsic(
@@ -122,4 +122,8 @@ def predict_extrinsic(
             res = session.run(None, {session.get_inputs()[0].name: X_subset})[0]
             y_log[mask] = res
 
-    return np.expm1(y_log)
+    out = np.expm1(y_log).reshape(Ms_arr.shape + (3,))
+    Hc_val = out[..., 0]
+    Mr_val = out[..., 1]
+    BHmax_val = out[..., 2]
+    return Hc_val, Mr_val, BHmax_val
