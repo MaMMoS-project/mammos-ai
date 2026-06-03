@@ -28,6 +28,7 @@ classifiers = [
 ]
 requires-python = ">=3.11"
 dependencies = [
+  "huggingface-hub",
   "mammos-analysis",
   "mammos-entity",
   "mammos-units",

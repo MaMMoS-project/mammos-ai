@@ -33,6 +33,13 @@ APIs and tutorials are available in the documentation. To access the documentati
 To install `mammos-ai`, you can use `pip install mammos-ai` inside a Python environment.
 For more details refer to the documentation.
 
+## Model files
+
+`mammos-ai` downloads ONNX model files from the public Hugging Face model
+repository [`mammos-project/mammos-ai-models`](https://huggingface.co/mammos-project/mammos-ai-models)
+using `huggingface_hub`. The files are cached locally by Hugging Face Hub after
+the first download.
+
 ## How to cite
 
 TODO

@@ -3,28 +3,27 @@
 Random forest model trained on simulated data for single grain cubic particles
 with 50 nm edge length, external field parallel to the anisotropy axis.
 See the
-`model repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_
+`Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_
+for model files and the
+`training repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_
 for full training-data details.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import mammos_entity as me
 import numpy as np
 import onnxruntime as ort
 
-from ._common import SESSION_OPTIONS
-
-_MODEL_DIR = Path(__file__).parent
+from ._common import SESSION_OPTIONS, download_model_file
 
 NAME = "cube50_singlegrain_random_forest_v0.1"
+MODEL_SUBFOLDER = "beyond-stoner-wohlfarth"
 
-PATHS = {
-    "classifier": _MODEL_DIR / "classifier_cube50_singlegrain_random_forest_v0.1.onnx",
-    "soft": _MODEL_DIR / "soft_cube50_singlegrain_random_forest_v0.1.onnx",
-    "hard": _MODEL_DIR / "hard_cube50_singlegrain_random_forest_v0.1.onnx",
+FILENAMES = {
+    "classifier": "classifier_cube50_singlegrain_random_forest_v0.1.onnx",
+    "soft": "soft_cube50_singlegrain_random_forest_v0.1.onnx",
+    "hard": "hard_cube50_singlegrain_random_forest_v0.1.onnx",
 }
 
 _DESCRIPTION = (
@@ -33,7 +32,8 @@ _DESCRIPTION = (
     "applied parallel to the anisotropy axis."
 )
 
-_SOURCE = (
+_MODEL_SOURCE = "https://huggingface.co/mammos-project/mammos-ai-models"
+_TRAINING_SOURCE = (
     "https://github.com/MaMMoS-project/ML-models/tree/main/"
     "beyond-stoner-wohlfarth/single-grain-easy-axis-model"
 )
@@ -50,7 +50,8 @@ CLASSIFY_METADATA = {
     "training_data_range": _TRAINING_DATA_RANGE,
     "input_parameters": ["Ms (A/m)", "A (J/m)", "K1 (J/m^3)"],
     "output_classes": {0: "soft magnetic", 1: "hard magnetic"},
-    "source": _SOURCE,
+    "source": _MODEL_SOURCE,
+    "training_source": _TRAINING_SOURCE,
 }
 
 PREDICT_METADATA = {
@@ -59,8 +60,14 @@ PREDICT_METADATA = {
     "training_data_range": _TRAINING_DATA_RANGE,
     "input_parameters": ["Ms (A/m)", "A (J/m)", "K1 (J/m^3)"],
     "output_parameters": ["Hc (A/m)", "Mr (A/m)", "BHmax (J/m^3)"],
-    "source": _SOURCE,
+    "source": _MODEL_SOURCE,
+    "training_source": _TRAINING_SOURCE,
 }
+
+
+def _model_path(model_key: str) -> str:
+    """Return a local cached path for one ONNX file."""
+    return download_model_file(FILENAMES[model_key], MODEL_SUBFOLDER)
 
 
 def is_hard_magnet(
@@ -77,7 +84,7 @@ def is_hard_magnet(
         Flat boolean array of shape ``(N,)`` where N is the number of input
         samples after flattening.
     """
-    session = ort.InferenceSession(PATHS["classifier"], SESSION_OPTIONS)
+    session = ort.InferenceSession(_model_path("classifier"), SESSION_OPTIONS)
     X = np.column_stack([Ms_arr.ravel(), A_arr.ravel(), K1_arr.ravel()]).astype(
         np.float32
     )
@@ -114,7 +121,7 @@ def predict_extrinsic(
     for is_hard in (False, True):
         mask = classes == is_hard
         if np.any(mask):
-            path = PATHS["hard" if is_hard else "soft"]
+            path = _model_path("hard" if is_hard else "soft")
             session = ort.InferenceSession(path, SESSION_OPTIONS)
             X_subset = X_log[mask]
             # Regressor expects (n, 3) [Ms, A, K1]; returns (n, 3)
