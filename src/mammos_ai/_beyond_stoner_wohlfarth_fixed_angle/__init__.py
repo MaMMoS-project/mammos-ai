@@ -87,7 +87,7 @@ def is_hard_magnet_from_Ms_A_K(
         >>> import mammos_ai
         >>> import mammos_entity as me
         >>> mammos_ai.is_hard_magnet_from_Ms_A_K(me.Ms(1e6), me.A(1e-12), me.Ku(1e6))
-        True
+        array(True)
 
     """
     m = _choose_model(model)
