@@ -38,7 +38,8 @@ For more details refer to the documentation.
 `mammos-ai` downloads ONNX model files from the public Hugging Face model
 repository [`mammos-project/mammos-ai-models`](https://huggingface.co/mammos-project/mammos-ai-models)
 using `huggingface_hub`. The files are cached locally by Hugging Face Hub after
-the first download.
+the first download. For information about e.g. cleaning the cache, refer to the
+[Hugging Face Hub documentation](https://huggingface.co/docs/huggingface_hub/en/guides/manage-cache#manage-your-file-based-cache).
 
 ## How to cite
 
