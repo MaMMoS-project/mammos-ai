@@ -12,29 +12,11 @@ if TYPE_CHECKING:
 import mammos_entity as me
 import numpy as np
 import onnxruntime as ort
-from huggingface_hub import hf_hub_download
 
 SESSION_OPTIONS = ort.SessionOptions()
 SESSION_OPTIONS.log_severity_level = 3
 
 MODEL_REPO_ID = "mammos-project/mammos-ai-models"
-
-
-def download_model_file(filename: str, subfolder: str) -> str:
-    """Download a model file from the MaMMoS Hugging Face model repository.
-
-    Args:
-        filename: File name inside the model subfolder.
-        subfolder: Subfolder inside the Hugging Face model repository.
-
-    Returns:
-        Local cached path to the downloaded file.
-    """
-    return hf_hub_download(
-        repo_id=MODEL_REPO_ID,
-        filename=filename,
-        subfolder=subfolder,
-    )
 
 
 def prepare_Ms_A_K1(

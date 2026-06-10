@@ -14,8 +14,9 @@ from __future__ import annotations
 import mammos_entity as me
 import numpy as np
 import onnxruntime as ort
+from huggingface_hub import hf_hub_download
 
-from ._common import SESSION_OPTIONS, download_model_file
+from ._common import MODEL_REPO_ID, SESSION_OPTIONS
 
 NAME = "cube50_singlegrain_random_forest_v0.1"
 MODEL_SUBFOLDER = "beyond-stoner-wohlfarth"
@@ -67,7 +68,11 @@ PREDICT_METADATA = {
 
 def _model_path(model_key: str) -> str:
     """Return a local cached path for one ONNX file."""
-    return download_model_file(FILENAMES[model_key], MODEL_SUBFOLDER)
+    return hf_hub_download(
+        repo_id=MODEL_REPO_ID,
+        filename=FILENAMES[model_key],
+        subfolder=MODEL_SUBFOLDER,
+    )
 
 
 def is_hard_magnet(
