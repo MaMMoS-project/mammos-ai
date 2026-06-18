@@ -67,7 +67,10 @@ PREDICT_METADATA = {
 
 
 def _model_path(model_key: str) -> str:
-    """Return a local cached path for one ONNX file."""
+    """Return a local cached path for one ONNX file.
+
+    If the file is not already cached, it will be downloaded from Hugging Face.
+    """
     return hf_hub_download(
         repo_id=MODEL_REPO_ID,
         filename=FILENAMES[model_key],
