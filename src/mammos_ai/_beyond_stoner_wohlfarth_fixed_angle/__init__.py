@@ -66,8 +66,10 @@ def is_hard_magnet_from_Ms_A_K(
       simulated data for single grain cubic particles with 50 nm edge length with
       the external field applied parallel to the anisotropy axis. These are both
       aligned along an edge of the cube. Further details on the training data
-      and model can be found in the
-      `model repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
+      can be found in the
+      `training repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
+      Model files are downloaded from the
+      `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
 
     Args:
         Ms: :entity:`SpontaneousMagnetization`.
@@ -135,8 +137,10 @@ def Hc_Mr_BHmax_from_Ms_A_K(
       simulated data for single grain cubic particles with 50 nm edge length with
       the external field applied parallel to the anisotropy axis. These are both
       aligned along an edge of the cube. Further details on the training data
-      and model can be found in the
-      `model repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
+      can be found in the
+      `training repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
+      Model files are downloaded from the
+      `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
 
     Args:
         Ms: :entity:`SpontaneousMagnetization`.

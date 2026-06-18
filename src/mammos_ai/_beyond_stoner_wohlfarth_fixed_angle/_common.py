@@ -16,6 +16,8 @@ import onnxruntime as ort
 SESSION_OPTIONS = ort.SessionOptions()
 SESSION_OPTIONS.log_severity_level = 3
 
+MODEL_REPO_ID = "mammos-project/mammos-ai-models"
+
 
 def prepare_Ms_A_K1(
     Ms: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
