@@ -127,8 +127,11 @@ def is_hard_magnet(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) ->
     # and returns a 1-D array of class labels (0=soft, 1=hard).
     results = session.run(None, {session.get_inputs()[0].name: X})[0]
     labels = results.astype(bool).astype(object)
-    # TODO: add valid-invalid classification here
+    session = ort.InferenceSession(_model_path("classifier_valid_invalid"), SESSION_OPTIONS)
+    results = session.run(None, {session.get_inputs()[0].name: X})[0]  # (0: invalid, 1: valid)
+    valid = results.astype(bool)
     labels[~in_range.ravel()] = np.nan
+    labels[~valid] = np.nan
     return labels.reshape(Ms_arr.shape)
 
 
