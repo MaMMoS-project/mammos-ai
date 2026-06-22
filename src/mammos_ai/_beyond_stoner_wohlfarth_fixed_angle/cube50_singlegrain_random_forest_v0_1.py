@@ -144,7 +144,7 @@ def predict_extrinsic(
         )
     )
 
-    y_log = np.empty((X_log.shape[0], 3), dtype=np.float32)
+    y_log = np.full((X_log.shape[0], 3), np.nan, dtype=np.float32)
     classes = np.atleast_1d(mat_class).ravel()
     for is_hard in (False, True):
         mask = classes == is_hard

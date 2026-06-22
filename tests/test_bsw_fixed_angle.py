@@ -246,6 +246,27 @@ def test_Hc_Mr_BHmax_2d_array_inputs():
     assert np.all(extrinsic_properties.BHmax.value > 0)
 
 
+def test_Hc_Mr_BHmax_out_of_range_2d_array_inputs():
+    """Test that out-of-training-range array inputs produce nan predictions."""
+    Ms = me.Ms([[1e6, 1e6], [1e6, 1e6]])
+    A = me.A([[1e-12, 1e-12], [1e-12, 1e-12]])
+    Ku = me.Ku([[1e4, 1e6], [1e3, 1e8]])
+
+    extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
+
+    assert np.shape(extrinsic_properties.Hc.value) == (2, 2)
+    assert np.shape(extrinsic_properties.Mr.value) == (2, 2)
+    assert np.shape(extrinsic_properties.BHmax.value) == (2, 2)
+
+    assert np.all(extrinsic_properties.Hc.value[0] > 0)
+    assert np.all(extrinsic_properties.Mr.value[0] > 0)
+    assert np.all(extrinsic_properties.BHmax.value[0] > 0)
+
+    assert np.all(np.isnan(extrinsic_properties.Hc.value[1]))
+    assert np.all(np.isnan(extrinsic_properties.Mr.value[1]))
+    assert np.all(np.isnan(extrinsic_properties.BHmax.value[1]))
+
+
 def test_Hc_Mr_BHmax_array_inputs_mixed_lengths():
     """Test that array inputs of mixed lengths raise an error."""
     Ms = me.Ms(1e6)
