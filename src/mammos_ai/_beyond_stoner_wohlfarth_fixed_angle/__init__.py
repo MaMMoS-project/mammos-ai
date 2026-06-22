@@ -19,11 +19,12 @@ if TYPE_CHECKING:
 import mammos_analysis
 import mammos_entity as me
 
-from . import cube50_singlegrain_random_forest_v0_1
+from . import cube50_singlegrain_random_forest_v0_1, cube50_singlegrain_random_forest_v1_0
 from ._common import prepare_Ms_A_K1
 
 _REGISTRY = {
     "cube50_singlegrain_random_forest_v0.1": cube50_singlegrain_random_forest_v0_1,
+    "cube50_singlegrain_random_forest_v1.0": cube50_singlegrain_random_forest_v1_0,
 }
 
 
@@ -49,7 +50,7 @@ def is_hard_magnet_from_Ms_A_K(
     Ms: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     A: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     K1: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
-    model: str = "cube50_singlegrain_random_forest_v0.1",
+    model: str = "cube50_singlegrain_random_forest_v1.0",
 ) -> bool | numpy.ndarray:
     """Classify material as soft or hard magnetic from micromagnetic parameters.
 
@@ -61,6 +62,15 @@ def is_hard_magnet_from_Ms_A_K(
     numpy array with the same shape is returned.
 
     The following models are available for the prediction:
+
+    - ``cube50_singlegrain_random_forest_v1.0``: Random forest model trained on extended
+      simulated data for single grain cubic particles with 50 nm edge length with
+      the external field applied parallel to the anisotropy axis. These are both
+      aligned along an edge of the cube. Further details on the training data
+      can be found in the
+      `training repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
+      Model files are downloaded from the
+      `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
 
     - ``cube50_singlegrain_random_forest_v0.1``: Random forest model trained on
       simulated data for single grain cubic particles with 50 nm edge length with
@@ -81,7 +91,7 @@ def is_hard_magnet_from_Ms_A_K(
         model: AI model used for the classification
 
     Returns:
-        Classification as False (soft) or True (hard).
+        Classification as False (soft), True (hard), or NaN (invalid).
         Returns a boolean for scalar inputs, or a numpy array
         with the same shape as the input for array inputs.
 
@@ -90,8 +100,8 @@ def is_hard_magnet_from_Ms_A_K(
         >>> import mammos_entity as me
         >>> mammos_ai.is_hard_magnet_from_Ms_A_K(me.Ms(1e6), me.A(1e-12), me.Ku(1e6))
         array(True, dtype=object)
-
     """
+    # TODO: revise docstring description, especially info about model v1.0.  Explain Nans in return statement.
     m = _choose_model(model)
     if not hasattr(m, "is_hard_magnet"):
         raise NotImplementedError(f"Model {model} cannot classify materials as hard or soft.")
@@ -101,7 +111,7 @@ def is_hard_magnet_from_Ms_A_K(
 
 
 def is_hard_magnet_from_Ms_A_K_metadata(
-    model: str = "cube50_singlegrain_random_forest_v0.1",
+    model: str = "cube50_singlegrain_random_forest_v1.0",
 ) -> dict:
     """Get metadata for the specified classification model.
 
@@ -119,7 +129,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     Ms: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     A: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     K1: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
-    model: str = "cube50_singlegrain_random_forest_v0.1",
+    model: str = "cube50_singlegrain_random_forest_v1.0",
 ) -> mammos_analysis.hysteresis.ExtrinsicProperties:
     """Predict Hc, Mr and BHmax from micromagnetic properties Ms, A and K1.
 
@@ -128,6 +138,15 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     material parameters.
 
     The following models are available for the prediction:
+
+    - ``cube50_singlegrain_random_forest_v1.0``: Random forest model trained on extended
+      simulated data for single grain cubic particles with 50 nm edge length with
+      the external field applied parallel to the anisotropy axis. These are both
+      aligned along an edge of the cube. Further details on the training data
+      can be found in the
+      `training repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
+      Model files are downloaded from the
+      `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
 
     - ``cube50_singlegrain_random_forest_v0.1``: Random forest model trained on
       simulated data for single grain cubic particles with 50 nm edge length with
@@ -156,6 +175,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
         >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(me.Ms(1e6), me.A(1e-12), me.Ku(1e6))
         ExtrinsicProperties(Hc=..., Mr=..., BHmax=...)
     """
+    # TODO: revise docstring description, especially info about model v1.0. Explain Nans in return statement.
     m = _choose_model(model)
     if not hasattr(m, "predict_extrinsic"):
         raise NotImplementedError(f"Model {model} cannot predict Hc, Mr or BHmax.")
@@ -169,7 +189,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
 
 
 def Hc_Mr_BHmax_from_Ms_A_K_metadata(
-    model: str = "cube50_singlegrain_random_forest_v0.1",
+    model: str = "cube50_singlegrain_random_forest_v1.0",
 ) -> dict:
     """Get metadata for the specified Hc, Mr, BHmax prediction model.
 
