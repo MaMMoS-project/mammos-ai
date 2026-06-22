@@ -78,6 +78,23 @@ def _model_path(model_key: str) -> str:
     )
 
 
+def _in_training_range(Ms_arr, A_arr, K1_arr) -> np.ndarray:
+    """Check if each sample is within the training data range for all parameters."""
+    Ms_min, Ms_max = (value.q.to_value("A/m") for value in _TRAINING_DATA_RANGE["Ms"])
+    A_min, A_max = (value.q.to_value("J/m") for value in _TRAINING_DATA_RANGE["A"])
+    K_min, K_max = (value.q.to_value("J/m3") for value in _TRAINING_DATA_RANGE["K"])
+
+    in_range = (
+        (Ms_arr >= Ms_min)
+        & (Ms_arr <= Ms_max)
+        & (A_arr >= A_min)
+        & (A_arr <= A_max)
+        & (K1_arr >= K_min)
+        & (K1_arr <= K_max)
+    )
+    return in_range
+
+
 def is_hard_magnet(
     Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray
 ) -> np.ndarray:
@@ -92,6 +109,7 @@ def is_hard_magnet(
         Flat boolean array of shape ``(N,)`` where N is the number of input
         samples after flattening.
     """
+    in_range = _in_training_range(Ms_arr, A_arr, K1_arr)
     session = ort.InferenceSession(_model_path("classifier"), SESSION_OPTIONS)
     X = np.column_stack([Ms_arr.ravel(), A_arr.ravel(), K1_arr.ravel()]).astype(
         np.float32
@@ -99,7 +117,9 @@ def is_hard_magnet(
     # The classifier expects input shape (n_samples, 3) containing [Ms, A, K1]
     # and returns a 1-D array of class labels (0=soft, 1=hard).
     results = session.run(None, {session.get_inputs()[0].name: X})[0]
-    return np.where(results == 0, False, True).reshape(Ms_arr.shape)
+    labels = results.astype(bool).astype(object)
+    labels[~in_range.ravel()] = np.nan
+    return labels.reshape(Ms_arr.shape)
 
 
 def predict_extrinsic(

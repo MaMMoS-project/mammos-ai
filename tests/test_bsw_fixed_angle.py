@@ -4,6 +4,38 @@ import numpy as np
 import pytest
 
 import mammos_ai
+from mammos_ai._beyond_stoner_wohlfarth_fixed_angle import (
+    cube50_singlegrain_random_forest_v0_1 as cube50_model,
+)
+
+
+def test_in_training_range_2d_array_inputs():
+    """Test that training range checks preserve input shape."""
+    Ms = np.array([[79.58e3, 3.98e6], [79.58e3 - 1, 79.58e3]])
+    A = np.array([[1e-13, 1e-11], [1e-13, 1e-14]])
+    Ku = np.array([[1e4, 1e7], [1e4, 1e4]])
+
+    in_range = cube50_model._in_training_range(Ms, A, Ku)
+
+    assert isinstance(in_range, np.ndarray)
+    assert in_range.shape == (2, 2)
+    assert np.all(in_range == np.array([[True, True], [False, False]]))
+
+
+def test_classify_magnetic_from_Ms_A_K_out_of_range_2d_array():
+    """Test that out-of-training-range array inputs preserve input shape."""
+    Ms = me.Ms([[1e6, 1e6], [1e6, 1e6]])
+    A = me.A([[1e-12, 1e-12], [1e-12, 1e-12]])
+    Ku = me.Ku([[1e4, 1e6], [1e3, 1e8]])
+
+    classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
+
+    assert isinstance(classification, np.ndarray)
+    assert classification.shape == (2, 2)
+    assert not classification[0, 0]
+    assert classification[0, 1]
+    assert np.isnan(classification[1, 0])
+    assert np.isnan(classification[1, 1])
 
 
 @pytest.mark.parametrize("Ms", [me.Ms(1e6), me.Ms(1e6).q, me.Ms(1e6).value])
@@ -35,9 +67,9 @@ def test_classify_magnetic_from_Ms_A_K_1d_array(Ms, A, Ku):
 @pytest.mark.parametrize(
     "Ms",
     [
-        me.Ms([[1e6, 2e6], [3e6, 4e6]]),
-        me.Ms([[1e6, 2e6], [3e6, 4e6]]).q,
-        me.Ms([[1e6, 2e6], [3e6, 4e6]]).value,
+        me.Ms([[1e6, 2e6], [3e6, 3.9e6]]),
+        me.Ms([[1e6, 2e6], [3e6, 3.9e6]]).q,
+        me.Ms([[1e6, 2e6], [3e6, 3.9e6]]).value,
     ],
 )
 @pytest.mark.parametrize(
@@ -66,14 +98,14 @@ def test_classify_magnetic_from_Ms_A_K_nd_array(Ms, A, Ku):
 
 def test_classify_magnetic_from_Ms_A_K_zeros():
     classification = mammos_ai.is_hard_magnet_from_Ms_A_K(0, 0, 0)
-    assert not classification
+    assert np.isnan(classification.item())
 
 
 def test_classify_magnetic_from_Ms_A_K_soft():
     """Test classification of a soft magnetic material."""
     Ms = me.Ms(1e6)
     A = me.A(1e-12)
-    Ku = me.Ku(1e3)
+    Ku = me.Ku(1e4)
     classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
     assert not classification
 
@@ -82,7 +114,7 @@ def test_classify_magnetic_from_Ms_A_K_hard():
     """Test classification of a hard magnetic material."""
     Ms = me.Ms(1e6)
     A = me.A(1e-12)
-    Ku = me.Ku(1e8)
+    Ku = me.Ku(1e6)
     classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
     assert classification
 
@@ -106,7 +138,7 @@ def test_classify_magnetic_array_inputs():
     """Test that array inputs are processed correctly for classification."""
     Ms = me.Ms([1e6, 1e6])
     A = me.A([1e-12, 1e-12])
-    Ku = me.Ku([1e3, 1e8])
+    Ku = me.Ku([1e4, 1e6])
 
     classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
 
@@ -196,7 +228,7 @@ def test_Hc_Mr_BHmax_from_Ms_A_K_specify_model(model):
 
 def test_Hc_Mr_BHmax_2d_array_inputs():
     """Test that array inputs produce correct shape outputs for predictions."""
-    Ms = me.Ms([[1e6, 2e6], [3e6, 4e6]])
+    Ms = me.Ms([[1e6, 2e6], [3e6, 3.9e6]])
     A = me.A([[1e-12, 2e-12], [3e-12, 4e-12]])
     Ku = me.Ku([[1e6, 2e6], [3e6, 4e6]])
     extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
