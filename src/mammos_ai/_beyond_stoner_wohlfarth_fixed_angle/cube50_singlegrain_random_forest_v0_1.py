@@ -35,8 +35,7 @@ _DESCRIPTION = (
 
 _MODEL_SOURCE = "https://huggingface.co/mammos-project/mammos-ai-models"
 _TRAINING_SOURCE = (
-    "https://github.com/MaMMoS-project/ML-models/tree/main/"
-    "beyond-stoner-wohlfarth/single-grain-easy-axis-model"
+    "https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model"
 )
 
 _TRAINING_DATA_RANGE = {
@@ -95,9 +94,7 @@ def _in_training_range(Ms_arr, A_arr, K1_arr) -> np.ndarray:
     return in_range
 
 
-def is_hard_magnet(
-    Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray
-) -> np.ndarray:
+def is_hard_magnet(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) -> np.ndarray:
     """Classify each sample as soft (False) or hard (True) magnetic.
 
     Args:
@@ -111,9 +108,7 @@ def is_hard_magnet(
     """
     in_range = _in_training_range(Ms_arr, A_arr, K1_arr)
     session = ort.InferenceSession(_model_path("classifier"), SESSION_OPTIONS)
-    X = np.column_stack([Ms_arr.ravel(), A_arr.ravel(), K1_arr.ravel()]).astype(
-        np.float32
-    )
+    X = np.column_stack([Ms_arr.ravel(), A_arr.ravel(), K1_arr.ravel()]).astype(np.float32)
     # The classifier expects input shape (n_samples, 3) containing [Ms, A, K1]
     # and returns a 1-D array of class labels (0=soft, 1=hard).
     results = session.run(None, {session.get_inputs()[0].name: X})[0]
@@ -122,9 +117,7 @@ def is_hard_magnet(
     return labels.reshape(Ms_arr.shape)
 
 
-def predict_extrinsic(
-    Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray
-) -> np.ndarray:
+def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) -> np.ndarray:
     """Predict Hc, Mr and BHmax for each sample.
 
     Args:
@@ -138,11 +131,7 @@ def predict_extrinsic(
     """
     mat_class = is_hard_magnet(Ms_arr, A_arr, K1_arr)
 
-    X_log = np.log1p(
-        np.column_stack([Ms_arr.ravel(), A_arr.ravel(), K1_arr.ravel()]).astype(
-            np.float32
-        )
-    )
+    X_log = np.log1p(np.column_stack([Ms_arr.ravel(), A_arr.ravel(), K1_arr.ravel()]).astype(np.float32))
 
     y_log = np.full((X_log.shape[0], 3), np.nan, dtype=np.float32)
     classes = np.atleast_1d(mat_class).ravel()

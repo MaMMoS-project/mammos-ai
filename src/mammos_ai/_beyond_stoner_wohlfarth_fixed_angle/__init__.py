@@ -94,9 +94,7 @@ def is_hard_magnet_from_Ms_A_K(
     """
     m = _choose_model(model)
     if not hasattr(m, "is_hard_magnet"):
-        raise NotImplementedError(
-            f"Model {model} cannot classify materials as hard or soft."
-        )
+        raise NotImplementedError(f"Model {model} cannot classify materials as hard or soft.")
     Ms_arr, A_arr, K1_arr = prepare_Ms_A_K1(Ms, A, K1)
     labels = m.is_hard_magnet(Ms_arr, A_arr, K1_arr)
     return labels
@@ -113,9 +111,7 @@ def is_hard_magnet_from_Ms_A_K_metadata(
     """
     m = _choose_model(model)
     if not hasattr(m, "CLASSIFY_METADATA"):
-        raise NotImplementedError(
-            f"Model {model} does not provide classification metadata."
-        )
+        raise NotImplementedError(f"Model {model} does not provide classification metadata.")
     return m.CLASSIFY_METADATA
 
 
@@ -183,7 +179,5 @@ def Hc_Mr_BHmax_from_Ms_A_K_metadata(
     """
     m = _choose_model(model)
     if not hasattr(m, "PREDICT_METADATA"):
-        raise NotImplementedError(
-            f"Model {model} does not provide Hc, Mr or BHmax prediction metadata."
-        )
+        raise NotImplementedError(f"Model {model} does not provide Hc, Mr or BHmax prediction metadata.")
     return m.PREDICT_METADATA

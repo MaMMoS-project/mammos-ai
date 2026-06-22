@@ -40,15 +40,9 @@ def prepare_Ms_A_K1(
     Raises:
         ValueError: if the three inputs do not have the same shape.
     """
-    Ms = me._entity.from_compatible(
-        "SpontaneousMagnetization", "A/m", Ms=Ms, enforce_unit=True
-    )
-    A = me._entity.from_compatible(
-        "ExchangeStiffnessConstant", "J/m", A=A, enforce_unit=True
-    )
-    K1 = me._entity.from_compatible(
-        "UniaxialAnisotropyConstant", "J/m^3", K1=K1, enforce_unit=True
-    )
+    Ms = me._entity.from_compatible("SpontaneousMagnetization", "A/m", Ms=Ms, enforce_unit=True)
+    A = me._entity.from_compatible("ExchangeStiffnessConstant", "J/m", A=A, enforce_unit=True)
+    K1 = me._entity.from_compatible("UniaxialAnisotropyConstant", "J/m^3", K1=K1, enforce_unit=True)
 
     Ms_arr = Ms.value
     A_arr = A.value
