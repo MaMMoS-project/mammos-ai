@@ -24,7 +24,7 @@ jobs:
       uses: prefix-dev/setup-pixi@v0.8.8
     # Windows unit test is run separately because the full test suite takes ~1.5 hours compared to ~3mins on mac and Ubuntu.
     - name: windows unit test
-      run: pixi run pytest pytest -k 'test_Hc_Mr_BHmax_from_Ms_A_K_single_input[Ku0-A0-Ms0]'
+      run: pixi run pytest -k 'test_Hc_Mr_BHmax_from_Ms_A_K_single_input[Ku0-A0-Ms0]'
       if: matrix.os == 'windows-latest'
     - name: unit tests
       run: pixi run test-unittest
