@@ -72,11 +72,13 @@ def is_hard_magnet_from_Ms_A_K(
       Model files are downloaded from the
       `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
 
-    - ``cube50_singlegrain_random_forest_v0.1``: Random forest model trained on
+    ``cube50_singlegrain_random_forest_v0.1``: Random forest model trained on
       simulated data for single grain cubic particles with 50 nm edge length with
       the external field applied parallel to the anisotropy axis. These are both
-      aligned along an edge of the cube. Further details on the training data
-      can be found in the
+      aligned along an edge of the cube. This version uses separate
+      classifiers to determine whether a sample is valid and, if valid, whether
+      it is soft or hard magnetic. If the sample is invalid, the prediction will
+      return NaN values. Further details on the training data can be found in the
       `training repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
       Model files are downloaded from the
       `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
@@ -101,7 +103,6 @@ def is_hard_magnet_from_Ms_A_K(
         >>> mammos_ai.is_hard_magnet_from_Ms_A_K(me.Ms(1e6), me.A(1e-12), me.Ku(1e6))
         array(True, dtype=object)
     """
-    # TODO: revise docstring description, especially info about model v1.0.  Explain Nans in return statement.
     m = _choose_model(model)
     if not hasattr(m, "is_hard_magnet"):
         raise NotImplementedError(f"Model {model} cannot classify materials as hard or soft.")
@@ -151,8 +152,10 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     - ``cube50_singlegrain_random_forest_v0.1``: Random forest model trained on
       simulated data for single grain cubic particles with 50 nm edge length with
       the external field applied parallel to the anisotropy axis. These are both
-      aligned along an edge of the cube. Further details on the training data
-      can be found in the
+      aligned along an edge of the cube. This version uses separate
+      classifiers to determine whether a sample is valid and, if valid, whether
+      it is soft or hard magnetic. If the sample is invalid, the prediction will
+      return NaN values. Further details on the training data can be found in the
       `training repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
       Model files are downloaded from the
       `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
@@ -175,7 +178,6 @@ def Hc_Mr_BHmax_from_Ms_A_K(
         >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(me.Ms(1e6), me.A(1e-12), me.Ku(1e6))
         ExtrinsicProperties(Hc=..., Mr=..., BHmax=...)
     """
-    # TODO: revise docstring description, especially info about model v1.0. Explain Nans in return statement.
     m = _choose_model(model)
     if not hasattr(m, "predict_extrinsic"):
         raise NotImplementedError(f"Model {model} cannot predict Hc, Mr or BHmax.")

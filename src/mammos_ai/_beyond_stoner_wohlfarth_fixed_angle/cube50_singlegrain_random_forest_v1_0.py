@@ -30,7 +30,7 @@ FILENAMES = {
 }
 
 _DESCRIPTION = (
-    "Random forest model trained on extended simulated data for single grain "  # TODO: double check description.
+    "Random forest model trained on extended simulated data for single grain "
     "cubic particles with 50 nm edge length with the external field "
     "applied parallel to the anisotropy axis."
 )
