@@ -265,6 +265,7 @@ def Ms_A_K_from_Hc_Mr_BHmax(
         >>> import mammos_ai
         >>> import mammos_entity as me
         >>> mammos_ai.Ms_A_K_from_Hc_Mr_BHmax(me.Hc(1e4), me.Mr(1e6), me.BHmax(200e3))
+        EntityCollection(Ms=..., A=..., K=...)
     """
     m = _choose_model(model)
     if not hasattr(m, "predict_intrinsic"):
