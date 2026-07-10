@@ -58,3 +58,41 @@ def prepare_Ms_A_K1(
         )
 
     return Ms_arr, A_arr, K1_arr
+
+
+def prepare_Hc_Mr_BHmax(
+    Hc: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
+    Mr: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
+    BHmax: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Turn (Hc, Mr, BHmax) inputs into numpy value arrays in SI units.
+
+    Args:
+        Hc: :entity:`CoerciveField`.
+            If no unit is provided, values are interpreted as 'A/m'.
+        Mr: :entity:`Remanence`.
+            If no unit is provided, values are interpreted as 'A/m'.
+        BHmax: :entity:`MaximumEnergyProduct`.
+            If no unit is provided, values are interpreted as 'J/m^3'.
+
+    Returns:
+        ``(Hc_arr, Mr_arr, BHmax_arr)``. The arrays use SI units.
+
+    Raises:
+        ValueError: if the three inputs do not have the same shape.
+    """
+    Hc = me._entity.from_compatible("CoerciveField", "A/m", Hc=Hc, enforce_unit=True)
+    Mr = me._entity.from_compatible("Remanence", "A/m", Mr=Mr, enforce_unit=True)
+    BHmax = me._entity.from_compatible("MaximumEnergyProduct", "J/m^3", BHmax=BHmax, enforce_unit=True)
+
+    Hc_arr = Hc.value
+    Mr_arr = Mr.value
+    BHmax_arr = BHmax.value
+
+    if not (Hc_arr.shape == Mr_arr.shape == BHmax_arr.shape):
+        raise ValueError(
+            f"Input arrays must have the same shape. Shapes are Hc: {Hc_arr.shape}, "
+            f"A: {Mr_arr.shape}, Ku: {BHmax_arr.shape}"
+        )
+
+    return Hc_arr, Mr_arr, BHmax_arr

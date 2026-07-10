@@ -20,7 +20,7 @@ import mammos_analysis
 import mammos_entity as me
 
 from . import cube50_singlegrain_random_forest_v0_1, cube50_singlegrain_random_forest_v1_0
-from ._common import prepare_Ms_A_K1
+from ._common import prepare_Hc_Mr_BHmax, prepare_Ms_A_K1
 
 _REGISTRY = {
     "cube50_singlegrain_random_forest_v0.1": cube50_singlegrain_random_forest_v0_1,
@@ -213,3 +213,65 @@ def Hc_Mr_BHmax_from_Ms_A_K_metadata(
     if not hasattr(m, "PREDICT_METADATA"):
         raise NotImplementedError(f"Model {model} does not provide Hc, Mr or BHmax prediction metadata.")
     return m.PREDICT_METADATA
+
+
+def Ms_A_K_from_Hc_Mr_BHmax(
+    Hc: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
+    Mr: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
+    BHmax: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
+    model: str = "cube50_singlegrain_random_forest_v1.0",
+) -> mammos_entity.EntityCollection:
+    """Predict Ms, A and K from hysteresis properties Hc, Mr and BHmax.
+
+    This function predicts intrinsic properties saturation magnetization Ms, exchange stiffness
+    A and anisotropy constant K given a set of characteristic hysteresis parameters.
+
+    The following models are available for the prediction:
+
+    - ``cube50_singlegrain_random_forest_v1.0``: Random forest model trained on extended
+      simulated data for single grain cubic particles with 50 nm edge length with
+      the external field applied parallel to the anisotropy axis. These are both
+      aligned along an edge of the cube. Further details on the training data
+      can be found in the
+      `training repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
+      Model files are downloaded from the
+      `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
+
+    - ``cube50_singlegrain_random_forest_v0.1``: Random forest model trained on
+      simulated data for single grain cubic particles with 50 nm edge length with
+      the external field applied parallel to the anisotropy axis. These are both
+      aligned along an edge of the cube. This version uses separate
+      classifiers to determine whether a sample is valid and, if valid, whether
+      it is soft or hard magnetic. If the sample is invalid, the prediction will
+      return NaN values. Further details on the training data can be found in the
+      `training repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
+      Model files are downloaded from the
+      `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
+
+    Args:
+        Hc: :entity:`CoerciveField`.
+            If no unit is provided, values are interpreted as 'A/m'.
+        Mr: :entity:`Remanence`.
+            If no unit is provided, values are interpreted as 'A/m'.
+        BHmax: :entity:`MaximumEnergyProduct`.
+            If no unit is provided, values are interpreted as 'J/m^3'.
+        model: AI model used for the prediction
+
+    Returns:
+        An object containing extrinsic properties Hc, Mr, BHmax
+
+    Examples:
+        >>> import mammos_ai
+        >>> import mammos_entity as me
+        >>> mammos_ai.Ms_A_K_from_Hc_Mr_BHmax(me.Hc(1e4), me.Mr(1e6), me.BHmax(200e3))
+    """
+    m = _choose_model(model)
+    if not hasattr(m, "predict_intrinsic"):
+        raise NotImplementedError(f"Model {model} cannot predict Hc, Mr or BHmax.")
+    Hc_arr, Mr_arr, BHmax_arr = prepare_Hc_Mr_BHmax(Hc, Mr, BHmax)
+    Ms, A, K = m.predict_intrinsic(Hc_arr, Mr_arr, BHmax_arr)
+    return mammos_entity.EntityCollection(
+        Ms=me.Ms(Ms, "A/m"),
+        A=me.A(A, "J/m"),
+        K=me.K1(K, "J/m3"),
+    )
