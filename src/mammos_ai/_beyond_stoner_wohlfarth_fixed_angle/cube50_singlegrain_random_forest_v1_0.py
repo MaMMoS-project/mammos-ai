@@ -181,3 +181,18 @@ def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray)
     Mr_val = out[..., 1]
     BHmax_val = out[..., 2]
     return Hc_val, Mr_val, BHmax_val
+
+
+def predict_intrinsic(Hc_arr: np.ndarray, Mr_arr: np.ndarray, BHmax_arr: np.ndarray) -> np.ndarray:
+    """Predict Hc, Mr and BHmax for each sample.
+
+    Args:
+        Hc_arr: Coercive field values in A/m.
+        Mr_arr: Remanence values in A/m.
+        BHmax_arr: Maximum Energy Product values in J/m^3.
+
+    Returns:
+        Array of shape ``(N, 3)`` containing ``[Ms, A, K]`` predictions in
+        SI units.
+    """
+    return 0
