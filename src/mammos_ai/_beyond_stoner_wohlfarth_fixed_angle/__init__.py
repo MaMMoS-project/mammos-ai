@@ -258,7 +258,7 @@ def Ms_A_K_from_Hc_Mr_BHmax(
         model: AI model used for the prediction
 
     Returns:
-        An object containing extrinsic properties Hc, Mr, BHmax
+        An entity collection with intrinsic parameters Ms, A, K
 
     Examples:
         >>> import mammos_ai
