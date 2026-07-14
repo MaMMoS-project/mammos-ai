@@ -81,7 +81,7 @@ def prepare_Hc_Mr_BHmax(
     Raises:
         ValueError: if the three inputs do not have the same shape.
     """
-    Hc = me._entity.from_compatible("CoerciveField", "A/m", Hc=Hc, enforce_unit=True)
+    Hc = me._entity.from_compatible("CoercivityHcExternal", "A/m", Hc=Hc, enforce_unit=True)
     Mr = me._entity.from_compatible("Remanence", "A/m", Mr=Mr, enforce_unit=True)
     BHmax = me._entity.from_compatible("MaximumEnergyProduct", "J/m^3", BHmax=BHmax, enforce_unit=True)
 
