@@ -215,16 +215,16 @@ def Hc_Mr_BHmax_from_Ms_A_K_metadata(
     return m.PREDICT_METADATA
 
 
-def Ms_A_K_from_Hc_Mr_BHmax(
+def Ms_A_K1_from_Hc_Mr_BHmax(
     Hc: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     Mr: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     BHmax: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     model: str = "cube50_singlegrain_random_forest_v1.0",
 ) -> mammos_entity.EntityCollection:
-    """Predict Ms, A and K from hysteresis properties Hc, Mr and BHmax.
+    """Predict Ms, A and K1 from hysteresis properties Hc, Mr and BHmax.
 
     This function predicts intrinsic properties saturation magnetization Ms, exchange stiffness
-    A and anisotropy constant K given a set of characteristic hysteresis parameters.
+    A and anisotropy constant K1 given a set of characteristic hysteresis parameters.
 
     The following models are available for the prediction:
 
@@ -249,7 +249,7 @@ def Ms_A_K_from_Hc_Mr_BHmax(
       `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
 
     Args:
-        Hc: :entity:`CoerciveField`.
+        Hc: :entity:`CoercivityHcExternal`.
             If no unit is provided, values are interpreted as 'A/m'.
         Mr: :entity:`Remanence`.
             If no unit is provided, values are interpreted as 'A/m'.
@@ -259,21 +259,21 @@ def Ms_A_K_from_Hc_Mr_BHmax(
 
     Returns:
         An entity collection with intrinsic parameters Ms :entity:`SpontaneousMagnetization`,
-        A :entity:`ExchangeStiffness`, K1 :entity:`MagnetocrystallineAnisotropyConstantK1`.
+        A :entity:`ExchangeStiffnessConstant`, K1 :entity:`MagnetocrystallineAnisotropyConstantK1`.
 
     Examples:
         >>> import mammos_ai
         >>> import mammos_entity as me
-        >>> mammos_ai.Ms_A_K_from_Hc_Mr_BHmax(me.Hc(1e4), me.Mr(1e6), me.BHmax(200e3))
-        EntityCollection(Ms=..., A=..., K=...)
+        >>> mammos_ai.Ms_A_K1_from_Hc_Mr_BHmax(me.Hc(1e4), me.Mr(1e6), me.BHmax(200e3))
+        EntityCollection(Ms=..., A=..., K1=...)
     """
     m = _choose_model(model)
     if not hasattr(m, "predict_intrinsic"):
         raise NotImplementedError(f"Model {model} cannot predict Hc, Mr or BHmax.")
     Hc_arr, Mr_arr, BHmax_arr = prepare_Hc_Mr_BHmax(Hc, Mr, BHmax)
-    Ms, A, K = m.predict_intrinsic(Hc_arr, Mr_arr, BHmax_arr)
+    Ms, A, K1 = m.predict_intrinsic(Hc_arr, Mr_arr, BHmax_arr)
     return mammos_entity.EntityCollection(
-        Ms=me.Ms(Ms, "A/m"),
-        A=me.A(A, "J/m"),
-        K=me.K1(K, "J/m3"),
+        Ms=me.Entity("SpontaneousMagnetization", Ms, "A/m"),
+        A=me.Entity("ExchangeStiffnessConstant", A, "J/m"),
+        K=me.Entity("MagnetocrystallineAnisotropyConstantK1", K1, "J/m3"),
     )
