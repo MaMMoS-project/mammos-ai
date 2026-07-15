@@ -19,12 +19,13 @@ if TYPE_CHECKING:
 import mammos_analysis
 import mammos_entity as me
 
-from . import cube50_singlegrain_random_forest_v0_1, cube50_singlegrain_random_forest_v1_0
+from . import cube50_singlegrain_random_forest_v0_1, cube50_singlegrain_random_forest_v1_0, cube50_inversinglegrain_random_forest_v1_0
 from ._common import prepare_Hc_Mr_BHmax, prepare_Ms_A_K1
 
 _REGISTRY = {
     "cube50_singlegrain_random_forest_v0.1": cube50_singlegrain_random_forest_v0_1,
     "cube50_singlegrain_random_forest_v1.0": cube50_singlegrain_random_forest_v1_0,
+    "cube50_inversinglegrain_random_forest_v1.0": cube50_inversinglegrain_random_forest_v1_0,
 }
 
 
@@ -50,7 +51,7 @@ def is_hard_magnet_from_Ms_A_K(
     Ms: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     A: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     K1: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
-    model: str = "cube50_singlegrain_random_forest_v1.0",
+    model: str = "cube50_inversesinglegrain_random_forest_v1.0",
 ) -> bool | numpy.ndarray:
     """Classify material as soft or hard magnetic from micromagnetic parameters.
 
@@ -63,7 +64,7 @@ def is_hard_magnet_from_Ms_A_K(
 
     The following models are available for the prediction:
 
-    - ``cube50_singlegrain_random_forest_v1.0``: Random forest model trained on extended
+    - ``cube50_inversesinglegrain_random_forest_v1.0``: Random forest model trained on extended
       simulated data for single grain cubic particles with 50 nm edge length with
       the external field applied parallel to the anisotropy axis. These are both
       aligned along an edge of the cube. Further details on the training data
@@ -117,7 +118,7 @@ def is_hard_magnet_from_Ms_A_K(
 
 
 def is_hard_magnet_from_Ms_A_K_metadata(
-    model: str = "cube50_singlegrain_random_forest_v1.0",
+    model: str = "cube50_inversesinglegrain_random_forest_v1.0",
 ) -> dict:
     """Get metadata for the specified classification model.
 
@@ -219,7 +220,7 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
     Hc: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     Mr: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     BHmax: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
-    model: str = "cube50_singlegrain_random_forest_v1.0",
+    model: str = "cube50_inversesinglegrain_random_forest_v1.0",
 ) -> mammos_entity.EntityCollection:
     """Predict Ms, A and K1 from hysteresis properties Hc, Mr and BHmax.
 
@@ -228,23 +229,12 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
 
     The following models are available for the prediction:
 
-    - ``cube50_singlegrain_random_forest_v1.0``: Random forest model trained on extended
+    - ``cube50_inversesinglegrain_random_forest_v1.0``: Random forest model trained on extended
       simulated data for single grain cubic particles with 50 nm edge length with
       the external field applied parallel to the anisotropy axis. These are both
       aligned along an edge of the cube. Further details on the training data
       can be found in the
-      `training repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
-      Model files are downloaded from the
-      `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
-
-    - ``cube50_singlegrain_random_forest_v0.1``: Random forest model trained on
-      simulated data for single grain cubic particles with 50 nm edge length with
-      the external field applied parallel to the anisotropy axis. These are both
-      aligned along an edge of the cube. This version uses separate
-      classifiers to determine whether a sample is valid and, if valid, whether
-      it is soft or hard magnetic. If the sample is invalid, the prediction will
-      return NaN values. Further details on the training data can be found in the
-      `training repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
+      `training repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/inverse-single-grain-easy-axis-model>`_.
       Model files are downloaded from the
       `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
 
@@ -264,7 +254,7 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
     Examples:
         >>> import mammos_ai
         >>> import mammos_entity as me
-        >>> mammos_ai.Ms_A_K1_from_Hc_Mr_BHmax(me.Hc(1e4), me.Mr(1e6), me.BHmax(200e3))
+        >>> mammos_ai.Ms_A_K1_from_Hc_Mr_BHmax(me.Hc(1e4), me.Mr(1e6), me.BHmax(200e3))   
         EntityCollection(Ms=..., A=..., K1=...)
     """
     m = _choose_model(model)
