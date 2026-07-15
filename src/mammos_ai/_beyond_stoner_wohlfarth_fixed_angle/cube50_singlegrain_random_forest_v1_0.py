@@ -184,7 +184,7 @@ def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray)
 
 
 def predict_intrinsic(Hc_arr: np.ndarray, Mr_arr: np.ndarray, BHmax_arr: np.ndarray) -> np.ndarray:
-    """Predict Hc, Mr and BHmax for each sample.
+    """Predict Ms, A and K1 for each sample.
 
     Args:
         Hc_arr: Coercive field values in A/m.
@@ -195,4 +195,15 @@ def predict_intrinsic(Hc_arr: np.ndarray, Mr_arr: np.ndarray, BHmax_arr: np.ndar
         Array of shape ``(N, 3)`` containing ``[Ms, A, K]`` predictions in
         SI units.
     """
+
+    X_log = np.log1p(np.column_stack([Hc_arr.ravel(), Mr_arr.ravel(), BHmax_arr.ravel()]).astype(np.float32))
+    
+    y_log = np.full((X_log.shape[0], 3), np.nan, dtype=np.float32)
+    classes = np.atleast_1d(True).ravel() # NOTE: assumes hard magnet
+    
+    
+    
+    
+    
+    
     return 0
