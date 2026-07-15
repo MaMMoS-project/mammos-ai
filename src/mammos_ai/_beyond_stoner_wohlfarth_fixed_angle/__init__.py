@@ -19,7 +19,11 @@ if TYPE_CHECKING:
 import mammos_analysis
 import mammos_entity as me
 
-from . import cube50_singlegrain_random_forest_v0_1, cube50_singlegrain_random_forest_v1_0, cube50_inversinglegrain_random_forest_v1_0
+from . import (
+    cube50_inversinglegrain_random_forest_v1_0,
+    cube50_singlegrain_random_forest_v0_1,
+    cube50_singlegrain_random_forest_v1_0,
+)
 from ._common import prepare_Hc_Mr_BHmax, prepare_Ms_A_K1
 
 _REGISTRY = {
@@ -254,7 +258,7 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
     Examples:
         >>> import mammos_ai
         >>> import mammos_entity as me
-        >>> mammos_ai.Ms_A_K1_from_Hc_Mr_BHmax(me.Hc(1e4), me.Mr(1e6), me.BHmax(200e3))   
+        >>> mammos_ai.Ms_A_K1_from_Hc_Mr_BHmax(me.Hc(1e4), me.Mr(1e6), me.BHmax(200e3))
         EntityCollection(Ms=..., A=..., K1=...)
     """
     m = _choose_model(model)
