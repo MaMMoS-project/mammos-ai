@@ -46,13 +46,13 @@ def _choose_model(model: str):
         raise ValueError(f"Unknown model {model}") from None
 
 
-def is_hard_magnet_from_Ms_A_K(
+def is_hard_magnet_from_Ms_A_K1(
     Ms: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     A: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     K1: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     model: str = "cube50_singlegrain_random_forest_v1.0",
 ) -> bool | numpy.ndarray:
-    """Classify material as soft or hard magnetic from micromagnetic parameters.
+    r"""Classify material as soft or hard magnetic from micromagnetic parameters.
 
     This function classifies a magnetic material as either soft or hard magnetic
     based on its micromagnetic parameters spontaneous magnetization Ms, exchange
@@ -89,8 +89,13 @@ def is_hard_magnet_from_Ms_A_K(
             If no unit is provided, values are interpreted as 'A/m'.
         A: :entity:`ExchangeStiffnessConstant`.
             If no unit is provided, values are interpreted as 'J/m'.
-        K1: :entity:`UniaxialAnisotropyConstant`.
-            If no unit is provided, values are interpreted as 'J/m^3'.
+        K1: First uniaxial magnetocrystalline anisotropy constant, defined by
+            the uniaxial anisotropy energy density :math:`K_1 \sin^2(\theta)`,
+            where :math:`\theta` is the angle between the anisotropy axis and
+            the magnetization. Possible compatible entities are
+            :entity:`MagnetocrystallineAnisotropyConstantK1` and
+            :entity:`UniaxialAnisotropyConstant`, and internally the former will
+            be used. If no unit is provided, values are interpreted as J/m^3.
         model: AI model used for the classification
 
     Returns:
@@ -104,7 +109,7 @@ def is_hard_magnet_from_Ms_A_K(
         >>> mammos_ai.is_hard_magnet_from_Ms_A_K(
         ...     me.Entity("SpontaneousMagnetization", 1e6),
         ...     me.Entity("ExchangeStiffnessConstant", 1e-12),
-        ...     me.Entity("UniaxialAnisotropyConstant", 1e6),
+        ...     me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e6),
         ... )
         array(True, dtype=object)
     """
@@ -116,7 +121,7 @@ def is_hard_magnet_from_Ms_A_K(
     return labels
 
 
-def is_hard_magnet_from_Ms_A_K_metadata(
+def is_hard_magnet_from_Ms_A_K1_metadata(
     model: str = "cube50_singlegrain_random_forest_v1.0",
 ) -> dict:
     """Get metadata for the specified classification model.
@@ -131,13 +136,13 @@ def is_hard_magnet_from_Ms_A_K_metadata(
     return m.CLASSIFY_METADATA
 
 
-def Hc_Mr_BHmax_from_Ms_A_K(
+def Hc_Mr_BHmax_from_Ms_A_K1(
     Ms: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     A: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     K1: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     model: str = "cube50_singlegrain_random_forest_v1.0",
 ) -> mammos_analysis.hysteresis.ExtrinsicProperties:
-    """Predict Hc, Mr and BHmax from micromagnetic properties Ms, A and K1.
+    r"""Predict Hc, Mr and BHmax from micromagnetic properties Ms, A and K1.
 
     This function predicts extrinsic properties coercive field Hc, remanent
     magnetization Mr and maximum energy product BHmax given a set of micromagnetic
@@ -171,8 +176,13 @@ def Hc_Mr_BHmax_from_Ms_A_K(
             If no unit is provided, values are interpreted as 'A/m'.
         A: :entity:`ExchangeStiffnessConstant`.
             If no unit is provided, values are interpreted as 'J/m'.
-        K1: :entity:`UniaxialAnisotropyConstant`.
-            If no unit is provided, values are interpreted as 'J/m^3'.
+        K1: First uniaxial magnetocrystalline anisotropy constant, defined by
+            the uniaxial anisotropy energy density :math:`K_1 \sin^2(\theta)`,
+            where :math:`\theta` is the angle between the anisotropy axis and
+            the magnetization. Possible compatible entities are
+            :entity:`MagnetocrystallineAnisotropyConstantK1` and
+            :entity:`UniaxialAnisotropyConstant`, and internally the former will
+            be used. If no unit is provided, values are interpreted as J/m^3.
         model: AI model used for the prediction
 
     Returns:
@@ -184,7 +194,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
         >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(
         ...     me.Entity("SpontaneousMagnetization", 1e6),
         ...     me.Entity("ExchangeStiffnessConstant", 1e-12),
-        ...     me.Entity("UniaxialAnisotropyConstant", 1e6),
+        ...     me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e6),
         ... )
         ExtrinsicProperties(Hc=..., Mr=..., BHmax=...)
     """
@@ -200,7 +210,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     )
 
 
-def Hc_Mr_BHmax_from_Ms_A_K_metadata(
+def Hc_Mr_BHmax_from_Ms_A_K1_metadata(
     model: str = "cube50_singlegrain_random_forest_v1.0",
 ) -> dict:
     """Get metadata for the specified Hc, Mr, BHmax prediction model.
