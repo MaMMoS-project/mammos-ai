@@ -92,7 +92,7 @@ def prepare_Hc_Mr_BHmax(
     if not (Hc_arr.shape == Mr_arr.shape == BHmax_arr.shape):
         raise ValueError(
             f"Input arrays must have the same shape. Shapes are Hc: {Hc_arr.shape}, "
-            f"A: {Mr_arr.shape}, Ku: {BHmax_arr.shape}"
+            f"A: {Mr_arr.shape}, K1: {BHmax_arr.shape}"
         )
 
     return Hc_arr, Mr_arr, BHmax_arr

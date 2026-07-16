@@ -20,7 +20,6 @@ import mammos_analysis
 import mammos_entity as me
 
 from . import (
-    cube50_inversinglegrain_random_forest_v1_0,
     cube50_singlegrain_random_forest_v0_1,
     cube50_singlegrain_random_forest_v1_0,
 )
@@ -29,7 +28,6 @@ from ._common import prepare_Hc_Mr_BHmax, prepare_Ms_A_K1
 _REGISTRY = {
     "cube50_singlegrain_random_forest_v0.1": cube50_singlegrain_random_forest_v0_1,
     "cube50_singlegrain_random_forest_v1.0": cube50_singlegrain_random_forest_v1_0,
-    "cube50_inversinglegrain_random_forest_v1.0": cube50_inversinglegrain_random_forest_v1_0,
 }
 
 
@@ -266,7 +264,7 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
         raise NotImplementedError(f"Model {model} cannot predict Hc, Mr or BHmax.")
     Hc_arr, Mr_arr, BHmax_arr = prepare_Hc_Mr_BHmax(Hc, Mr, BHmax)
     Ms, A, K1 = m.predict_intrinsic(Hc_arr, Mr_arr, BHmax_arr)
-    return mammos_entity.EntityCollection(
+    return me.EntityCollection(
         Ms=me.Entity("SpontaneousMagnetization", Ms, "A/m"),
         A=me.Entity("ExchangeStiffnessConstant", A, "J/m"),
         K1=me.Entity("MagnetocrystallineAnisotropyConstantK1", K1, "J/m3"),
