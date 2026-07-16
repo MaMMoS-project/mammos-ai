@@ -269,5 +269,5 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
     return mammos_entity.EntityCollection(
         Ms=me.Entity("SpontaneousMagnetization", Ms, "A/m"),
         A=me.Entity("ExchangeStiffnessConstant", A, "J/m"),
-        K=me.Entity("MagnetocrystallineAnisotropyConstantK1", K1, "J/m3"),
+        K1=me.Entity("MagnetocrystallineAnisotropyConstantK1", K1, "J/m3"),
     )
