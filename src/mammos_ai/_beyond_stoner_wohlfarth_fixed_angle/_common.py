@@ -68,7 +68,7 @@ def prepare_Hc_Mr_BHmax(
     """Turn (Hc, Mr, BHmax) inputs into numpy value arrays in SI units.
 
     Args:
-        Hc: :entity:`CoerciveField`.
+        Hc: :entity:`CoercivityHcExternal`.
             If no unit is provided, values are interpreted as 'A/m'.
         Mr: :entity:`Remanence`.
             If no unit is provided, values are interpreted as 'A/m'.
