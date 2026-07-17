@@ -257,8 +257,7 @@ def mc_error_propagation_Hc_Mr_BHmax_from_Ms_A_K(
     Returns:
         An entity collection containing ``Hc_mean``, ``Mr_mean``,
         ``BHmax_mean``, ``Hc_std``, ``Mr_std``, ``BHmax_std``, and the
-        diagnostic fields ``valid_count``, ``sample_count`` and
-        ``valid_fraction``.
+        diagnostic fields ``valid_count``, and ``valid_fraction``.
 
     Raises:
         ValueError: if input means or standard deviations have incompatible
@@ -321,6 +320,5 @@ def mc_error_propagation_Hc_Mr_BHmax_from_Ms_A_K(
         Mr_std=me.Mr(Mr_std),
         BHmax_std=me.BHmax(BHmax_std),
         valid_count=valid_count,
-        sample_count=n_samples,
         valid_fraction=valid_count / n_samples,
     )
