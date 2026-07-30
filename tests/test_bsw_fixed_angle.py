@@ -38,6 +38,20 @@ def test_classify_magnetic_from_Ms_A_K_out_of_range_2d_array():
     assert np.isnan(classification[1, 1])
 
 
+@pytest.mark.parametrize(
+    "Ms",
+    [
+        me.Entity("SpontaneousMagnetization", 1e6, "A/m"),
+        me.Entity("SaturationMagnetization", 1e6, "A/m"),
+    ],
+)
+def test_classify_magnetic_from_Ms_A_K_accepts_compatible_magnetization_entities(Ms):
+    """Test classification accepts spontaneous and saturation magnetization."""
+    classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, me.A(1e-12), me.Ku(1e6))
+
+    assert classification in [True, False]
+
+
 @pytest.mark.parametrize("Ms", [me.Ms(1e6), me.Ms(1e6).q, me.Ms(1e6).value])
 @pytest.mark.parametrize("A", [me.A(1e-12), me.A(1e-12).q, me.A(1e-12).value])
 @pytest.mark.parametrize("Ku", [me.Ku(1e6), me.Ku(1e6).q, me.Ku(1e6).value])
@@ -172,6 +186,20 @@ def test_Hc_Mr_BHmax_from_Ms_A_K_single_input(Ms, A, Ku):
     assert np.all(extrinsic_properties.Hc.q > 0)
     assert np.all(extrinsic_properties.Mr.q > 0)
     assert np.all(extrinsic_properties.BHmax.q > 0)
+
+
+@pytest.mark.parametrize(
+    "Ms",
+    [
+        me.Entity("SpontaneousMagnetization", 1e6, "A/m"),
+        me.Entity("SaturationMagnetization", 1e6, "A/m"),
+    ],
+)
+def test_Hc_Mr_BHmax_from_Ms_A_K_accepts_compatible_magnetization_entities(Ms):
+    """Test prediction accepts spontaneous and saturation magnetization."""
+    extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, me.A(1e-12), me.Ku(1e6))
+
+    assert isinstance(extrinsic_properties, mammos_analysis.hysteresis.ExtrinsicProperties)
 
 
 @pytest.mark.parametrize("Ms", [me.Ms([1e5, 2e5]), me.Ms([1e5, 2e5]).q, me.Ms([1e5, 2e5]).value])

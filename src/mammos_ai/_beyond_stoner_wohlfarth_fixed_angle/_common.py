@@ -27,7 +27,8 @@ def prepare_Ms_A_K1(
     """Turn (Ms, A, K1) inputs into numpy value arrays in SI units.
 
     Args:
-        Ms: :entity:`SpontaneousMagnetization`.
+        Ms: :entity:`SpontaneousMagnetization` or
+            :entity:`SaturationMagnetization`.
             If no unit is provided, values are interpreted as 'A/m'.
         A: :entity:`ExchangeStiffnessConstant`.
             If no unit is provided, values are interpreted as 'J/m'.
