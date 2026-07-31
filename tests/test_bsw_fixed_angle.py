@@ -49,7 +49,7 @@ def test_classify_magnetic_from_Ms_A_K_accepts_compatible_magnetization_entities
     """Test classification accepts spontaneous and saturation magnetization."""
     classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, me.A(1e-12), me.Ku(1e6))
 
-    assert classification in [True, False]
+    assert classification
 
 
 @pytest.mark.parametrize("Ms", [me.Ms(1e6), me.Ms(1e6).q, me.Ms(1e6).value])
