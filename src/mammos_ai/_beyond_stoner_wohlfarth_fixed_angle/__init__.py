@@ -84,7 +84,8 @@ def is_hard_magnet_from_Ms_A_K(
       `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
 
     Args:
-        Ms: :entity:`SpontaneousMagnetization`.
+        Ms: :entity:`SpontaneousMagnetization` or
+            :entity:`SaturationMagnetization`.
             If no unit is provided, values are interpreted as 'A/m'.
         A: :entity:`ExchangeStiffnessConstant`.
             If no unit is provided, values are interpreted as 'J/m'.
@@ -161,7 +162,8 @@ def Hc_Mr_BHmax_from_Ms_A_K(
       `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
 
     Args:
-        Ms: :entity:`SpontaneousMagnetization`.
+        Ms: :entity:`SpontaneousMagnetization` or
+            :entity:`SaturationMagnetization`.
             If no unit is provided, values are interpreted as 'A/m'.
         A: :entity:`ExchangeStiffnessConstant`.
             If no unit is provided, values are interpreted as 'J/m'.
