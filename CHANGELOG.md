@@ -6,6 +6,25 @@ This project uses [towncrier](https://towncrier.readthedocs.io/) and the changes
 
 <!-- towncrier release notes start -->
 
+## [mammos-ai 0.3.0](https://github.com/MaMMoS-project/mammos-ai/tree/0.3.0) – 2026-07-31
+
+### Added
+
+- Added version 1.0 of the BSW random forest models trained on the extended dataset. ([#43](https://github.com/MaMMoS-project/mammos-ai/pull/43))
+
+### Changed
+
+- ONNX model files are now downloaded from the MaMMoS Hugging Face model repository instead of being shipped inside the package. ([#37](https://github.com/MaMMoS-project/mammos-ai/pull/37))
+
+### Fixed
+
+- Predictions now also accept saturation magnetization entities as inputs for Ms. ([#52](https://github.com/MaMMoS-project/mammos-ai/pull/52))
+
+### Misc
+
+- Restructure the beyond Stoner-Wohlfarth fixed-angle subpackage so each model lives in its own module. ([#33](https://github.com/MaMMoS-project/mammos-ai/pull/33))
+
+
 ## [mammos-ai 0.2.0](https://github.com/MaMMoS-project/mammos-ai/tree/0.2.0) – 2025-12-11
 
 ### Added
