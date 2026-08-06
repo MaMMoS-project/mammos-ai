@@ -72,7 +72,7 @@ def is_hard_magnet_from_Ms_A_K(
       Model files are downloaded from the
       `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
 
-    ``cube50_singlegrain_random_forest_v0.1``: Random forest model trained on
+    - ``cube50_singlegrain_random_forest_v0.1``: Random forest model trained on
       simulated data for single grain cubic particles with 50 nm edge length with
       the external field applied parallel to the anisotropy axis. These are both
       aligned along an edge of the cube. This version uses separate
