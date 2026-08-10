@@ -263,7 +263,7 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
             Ms=Entity(ontology_label='SpontaneousMagnetization', value=..., unit='A / m'),
             A=Entity(ontology_label='ExchangeStiffnessConstant', value=..., unit='J / m'),
             K1=Entity(ontology_label='MagnetocrystallineAnisotropyConstantK1', value=..., unit='J / m3'),
-            )
+        )
     """
     m = _choose_model(model)
     if not hasattr(m, "predict_intrinsic"):
