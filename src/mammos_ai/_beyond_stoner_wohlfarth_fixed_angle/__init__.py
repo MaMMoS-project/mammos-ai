@@ -120,7 +120,7 @@ def is_hard_magnet_from_Ms_A_K(
 
 
 def is_hard_magnet_from_Ms_A_K_metadata(
-    model: str = "cube50_inversesinglegrain_random_forest_v1.0",
+    model: str = "cube50_singlegrain_random_forest_v1.0",
 ) -> dict:
     """Get metadata for the specified classification model.
 
