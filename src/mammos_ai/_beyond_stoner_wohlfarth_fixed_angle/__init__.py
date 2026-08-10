@@ -222,7 +222,7 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
     Hc: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     Mr: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     BHmax: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
-    model: str = "cube50_singlegrain_random_forest_v1.0", 
+    model: str = "cube50_singlegrain_random_forest_v1.0",
 ) -> mammos_entity.EntityCollection:
     """Predict Ms, A and K1 from hysteresis properties Hc, Mr and BHmax.
 
