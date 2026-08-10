@@ -256,8 +256,14 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
     Examples:
         >>> import mammos_ai
         >>> import mammos_entity as me
-        >>> mammos_ai.Ms_A_K1_from_Hc_Mr_BHmax(me.Hc(1e4), me.Mr(1e6), me.BHmax(200e3))
-        EntityCollection(Ms=..., A=..., K1=...)
+        >>> dat = mammos_ai.Ms_A_K1_from_Hc_Mr_BHmax(me.Hc(1e4), me.Mr(1e6), me.BHmax(200e3))
+        >>> dat  # doctest: +ELLIPSIS
+        EntityCollection(
+            description='',
+            Ms=Entity(ontology_label='SpontaneousMagnetization', value=..., unit='A / m'),
+            A=Entity(ontology_label='ExchangeStiffnessConstant', value=..., unit='J / m'),
+            K1=Entity(ontology_label='MagnetocrystallineAnisotropyConstantK1', value=..., unit='J / m3'), 
+            )
     """
     m = _choose_model(model)
     if not hasattr(m, "predict_intrinsic"):
