@@ -27,7 +27,9 @@ FILENAMES = {
     "classifier_hard_soft": "classifier_hard_soft_cube50_singlegrain_random_forest_v1.0.onnx",
     "soft": "soft_cube50_singlegrain_random_forest_v1.0.onnx",
     "hard": "hard_cube50_singlegrain_random_forest_v1.0.onnx",
+    "inverse": "hard_cube50_inversesinglegrain_random_forest_v1.0.onnx",
 }
+
 
 _DESCRIPTION = (
     "Random forest model trained on extended simulated data for single grain "
@@ -200,4 +202,4 @@ def predict_intrinsic(Hc_arr: np.ndarray, Mr_arr: np.ndarray, BHmax_arr: np.ndar
     y_log = np.full((X_log.shape[0], 3), np.nan, dtype=np.float32)
     classes = np.atleast_1d(True).ravel()  # NOTE: assumes hard magnet
 
-    return 0
+    return 0, 0, 0
