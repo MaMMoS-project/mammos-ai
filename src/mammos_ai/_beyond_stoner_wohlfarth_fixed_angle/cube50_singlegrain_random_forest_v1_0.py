@@ -200,6 +200,15 @@ def predict_intrinsic(Hc_arr: np.ndarray, Mr_arr: np.ndarray, BHmax_arr: np.ndar
     X_log = np.log1p(np.column_stack([Hc_arr.ravel(), Mr_arr.ravel(), BHmax_arr.ravel()]).astype(np.float32))
 
     y_log = np.full((X_log.shape[0], 3), np.nan, dtype=np.float32)
-    classes = np.atleast_1d(True).ravel()  # NOTE: assumes hard magnet
-
-    return 0, 0, 0
+    classes = np.atleast_1d(True).ravel()  # NOTE: assumes hard magnet TODO: discuss
+    path = _model_path("inverse")
+    session = ort.InferenceSession(path, SESSION_OPTIONS)
+    res = session.run(None, {session.get_inputs()[0].name: X_log})[0]
+    y_log = res
+    
+    # inverse log-tf
+    out = np.expm1(y_log).reshape(Hc_arr.shape + (3,))
+    Ms_val = out[..., 0]
+    A_val = out[..., 1]
+    K1_val = out[..., 2]    
+    return Ms_val, A_val, K1_val
