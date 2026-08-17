@@ -34,7 +34,8 @@ _TRAINING_DATA_RANGE = {
     "K": (me.Ku(1e4), me.Ku(1e7)),
 }
 
-_MODEL_SOURCE = "TODO"  # TODO: add paper DOI
+_MODEL_SOURCE = "https://doi.org/10.48550/arXiv.2607.29249"
+# TODO: add paper DOI when published
 
 _TRAINING_SOURCE = "TODO"  # TODO: add training repo
 
