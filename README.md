@@ -1,16 +1,17 @@
 # mammos-ai
 
-`mammos-ai` provides ...
+`mammos-ai` provides pre-trained machine learning (ML) and artificial intelligence (AI) models.
 
-| Description   | Badge                                                                                                                                                                                                                           |
-|---------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Tests         | [![Test package](https://github.com/MaMMoS-project/mammos-ai/actions/workflows/test.yml/badge.svg)](https://github.com/MaMMoS-project/mammos-ai/actions/workflows/test.yml)                                                     |
-| Linting       | [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/MaMMoS-project/mammos-ai/main.svg)](https://results.pre-commit.ci/latest/github/MaMMoS-project/mammos-ai/main)                                              |
+| Description   | Badge                                                                                                                                                                                                                   |
+|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Tests         | [![Test package](https://github.com/MaMMoS-project/mammos-ai/actions/workflows/test.yml/badge.svg)](https://github.com/MaMMoS-project/mammos-ai/actions/workflows/test.yml)                                             |
+| Linting       | [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/MaMMoS-project/mammos-ai/main.svg)](https://results.pre-commit.ci/latest/github/MaMMoS-project/mammos-ai/main)                                      |
 | Releases      | [![PyPI version](https://badge.fury.io/py/mammos-ai.svg)](https://badge.fury.io/py/mammos-ai) [![Conda Version](https://img.shields.io/conda/vn/conda-forge/mammos-ai.svg)](https://anaconda.org/conda-forge/mammos-ai) |
-| Documentation | [![Documentation](https://img.shields.io/badge/Docs-mammos--project.github.io%2Fmammos-blue)](https://mammos-project.github.io/mammos/index.html)                                                                               |
-| Binder        | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/mammos-project/mammos-ai/latest?urlpath=lab%2Ftree%2Fexamples)                                                                                      |
-| License       | [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)                                                                                                                            |
-| DOI           | TODO                                                                                                                                                                                                                            |
+| Documentation | [![Documentation](https://img.shields.io/badge/Docs-mammos--project.github.io%2Fmammos-blue)](https://mammos-project.github.io/mammos/index.html)                                                                       |
+| Binder        | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/mammos-project/mammos-ai/latest?urlpath=lab%2Ftree%2Fexamples)                                                                              |
+| License       | [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)                                                                                                                    |
+| DOI           | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21717867.svg)](https://doi.org/10.5281/zenodo.21717867)                                                                                                             |
+|               |                                                                                                                                                                                                                         |
 
 
 ## Try it in the cloud
