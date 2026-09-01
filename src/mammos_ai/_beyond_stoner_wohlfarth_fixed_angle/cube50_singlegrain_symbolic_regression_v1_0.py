@@ -8,7 +8,8 @@ with 50 nm edge length, and external field parallel to the anisotropy axis.
 More information on the equations and the use of this model is available at:
 https://mammos-project.github.io/mammos/examples/mammos-ai/symbolic_regression.html.
 
-TODO: add citation / DOI from paper.
+The equations defined by the model can be found in the docstring of the
+:py:func:`predict_extrinsic` function.
 """
 
 from __future__ import annotations
@@ -76,7 +77,43 @@ def _in_training_range(Ms_arr, A_arr, K1_arr) -> np.ndarray:
 
 
 def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) -> np.ndarray:
-    """Predict Hc, Mr and BHmax for each sample.
+    r"""Predict Hc, Mr and BHmax for each sample.
+
+    The model works with the following rescaling quantities:
+
+    * the anisotropy field:
+
+      .. math::
+        H_{\mathrm{A}} := \frac{2K}{\mu_0 M_{\mathrm{s}}},
+
+    * the energy product scaling variable:
+
+      .. math::
+        BH_{\mathrm{s}} := \frac{\mu_0 M_{\mathrm{s}}^2}{4},
+
+    * the hardness parameter
+
+      .. math::
+        \kappa := \sqrt{\frac{K}{\mu_0 M_{\mathrm{s}}^2}},
+
+    * the exchange length:
+
+      .. math::
+        \ell_{\mathrm{ex}} := \sqrt{\frac{2 A}{\mu_0 M_{\mathrm{s}}^2}},
+
+    * the reduced grain size:
+      .. math::
+        \tilde{L} := \frac{L}{\ell_{\mathrm{ex}}}.
+
+    Then, the model defines the following extrinsic properties:
+
+      .. math::
+        H_\mathrm{c} = \left[\alpha - n\,\frac{\ln\tilde{L}}{\kappa}\right] H_\mathrm{A}, \\
+        M_\mathrm{r} = \left(1 - \varepsilon_m \frac{\tilde{L}}{\kappa^4}\right) M_\mathrm{s}, \\
+        BH_\mathrm{max} = \left(1 - \varepsilon_b \frac{\tilde{L}}{\kappa^4}\right)^{\!2} BH_{\mathrm{s}}, \\
+
+    with fitted constants :math:`\alpha = 0.942`, :math:`n = 0.0921`,
+    :math:`\varepsilon_m = 5.18 \times 10^{-5}`, and :math:`\varepsilon_b = 7.81 \times 10^{-5}`.
 
     Args:
         Ms_arr: Spontaneous magnetization values in A/m.
@@ -87,6 +124,7 @@ def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray)
         Array of shape ``(N, 3)`` containing ``[Hc, Mr, BHmax]`` predictions in
         SI units.
     """
+    # TODO: This docstring is never showed in the documentation. Maybe we should change that.
     mu0_Ms = u.constants.mu0.value * Ms_arr
     mu0_Ms2 = mu0_Ms * Ms_arr
     H_A = 2 * K1_arr / mu0_Ms
