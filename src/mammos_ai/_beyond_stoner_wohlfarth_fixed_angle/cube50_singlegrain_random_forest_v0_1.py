@@ -39,9 +39,18 @@ _TRAINING_SOURCE = (
 )
 
 _TRAINING_DATA_RANGE = {
-    "Ms": (me.Ms(79.58e3), me.Ms(3.98e6)),
-    "A": (me.A(1e-13), me.A(1e-11)),
-    "K": (me.Ku(1e4), me.Ku(1e7)),
+    "Ms": (
+        me.Entity("SpontaneousMagnetization", 79.58e3),
+        me.Entity("SpontaneousMagnetization", 3.98e6),
+    ),
+    "A": (
+        me.Entity("ExchangeStiffnessConstant", 1e-13),
+        me.Entity("ExchangeStiffnessConstant", 1e-11),
+    ),
+    "K": (
+        me.Entity("UniaxialAnisotropyConstant", 1e4),
+        me.Entity("UniaxialAnisotropyConstant", 1e7),
+    ),
 }
 
 CLASSIFY_METADATA = {

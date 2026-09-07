@@ -101,7 +101,11 @@ def is_hard_magnet_from_Ms_A_K(
     Examples:
         >>> import mammos_ai
         >>> import mammos_entity as me
-        >>> mammos_ai.is_hard_magnet_from_Ms_A_K(me.Ms(1e6), me.A(1e-12), me.Ku(1e6))
+        >>> mammos_ai.is_hard_magnet_from_Ms_A_K(
+        ...     me.Entity("SpontaneousMagnetization", 1e6),
+        ...     me.Entity("ExchangeStiffnessConstant", 1e-12),
+        ...     me.Entity("UniaxialAnisotropyConstant", 1e6),
+        ... )
         array(True, dtype=object)
     """
     m = _choose_model(model)
@@ -177,7 +181,11 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     Examples:
         >>> import mammos_ai
         >>> import mammos_entity as me
-        >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(me.Ms(1e6), me.A(1e-12), me.Ku(1e6))
+        >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(
+        ...     me.Entity("SpontaneousMagnetization", 1e6),
+        ...     me.Entity("ExchangeStiffnessConstant", 1e-12),
+        ...     me.Entity("UniaxialAnisotropyConstant", 1e6),
+        ... )
         ExtrinsicProperties(Hc=..., Mr=..., BHmax=...)
     """
     m = _choose_model(model)
@@ -186,9 +194,9 @@ def Hc_Mr_BHmax_from_Ms_A_K(
     Ms_arr, A_arr, K1_arr = prepare_Ms_A_K1(Ms, A, K1)
     Hc_val, Mr_val, BHmax_val = m.predict_extrinsic(Ms_arr, A_arr, K1_arr)
     return mammos_analysis.hysteresis.ExtrinsicProperties(
-        Hc=me.Hc(Hc_val, "A/m"),
-        Mr=me.Mr(Mr_val, "A/m"),
-        BHmax=me.BHmax(BHmax_val, "J/m3"),
+        Hc=me.Entity("CoercivityHcExternal", Hc_val, "A/m"),
+        Mr=me.Entity("Remanence", Mr_val, "A/m"),
+        BHmax=me.Entity("MaximumEnergyProduct", BHmax_val, "J/m3"),
     )
 
 

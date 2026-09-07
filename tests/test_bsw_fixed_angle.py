@@ -24,9 +24,9 @@ def test_in_training_range_2d_array_inputs():
 
 def test_classify_magnetic_from_Ms_A_K_out_of_range_2d_array():
     """Test that out-of-training-range array inputs preserve input shape."""
-    Ms = me.Ms([[1e6, 1e6], [1e6, 1e6]])
-    A = me.A([[1e-12, 1e-12], [1e-12, 1e-12]])
-    Ku = me.Ku([[1e4, 1e6], [1e3, 1e8]])
+    Ms = me.Entity("SpontaneousMagnetization", [[1e6, 1e6], [1e6, 1e6]])
+    A = me.Entity("ExchangeStiffnessConstant", [[1e-12, 1e-12], [1e-12, 1e-12]])
+    Ku = me.Entity("UniaxialAnisotropyConstant", [[1e4, 1e6], [1e3, 1e8]])
 
     classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
 
@@ -47,23 +47,69 @@ def test_classify_magnetic_from_Ms_A_K_out_of_range_2d_array():
 )
 def test_classify_magnetic_from_Ms_A_K_accepts_compatible_magnetization_entities(Ms):
     """Test classification accepts spontaneous and saturation magnetization."""
-    classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, me.A(1e-12), me.Ku(1e6))
+    classification = mammos_ai.is_hard_magnet_from_Ms_A_K(
+        Ms,
+        me.Entity("ExchangeStiffnessConstant", 1e-12),
+        me.Entity("UniaxialAnisotropyConstant", 1e6),
+    )
 
     assert classification
 
 
-@pytest.mark.parametrize("Ms", [me.Ms(1e6), me.Ms(1e6).q, me.Ms(1e6).value])
-@pytest.mark.parametrize("A", [me.A(1e-12), me.A(1e-12).q, me.A(1e-12).value])
-@pytest.mark.parametrize("Ku", [me.Ku(1e6), me.Ku(1e6).q, me.Ku(1e6).value])
+@pytest.mark.parametrize(
+    "Ms",
+    [
+        me.Entity("SpontaneousMagnetization", 1e6),
+        me.Entity("SpontaneousMagnetization", 1e6).q,
+        me.Entity("SpontaneousMagnetization", 1e6).value,
+    ],
+)
+@pytest.mark.parametrize(
+    "A",
+    [
+        me.Entity("ExchangeStiffnessConstant", 1e-12),
+        me.Entity("ExchangeStiffnessConstant", 1e-12).q,
+        me.Entity("ExchangeStiffnessConstant", 1e-12).value,
+    ],
+)
+@pytest.mark.parametrize(
+    "Ku",
+    [
+        me.Entity("UniaxialAnisotropyConstant", 1e6),
+        me.Entity("UniaxialAnisotropyConstant", 1e6).q,
+        me.Entity("UniaxialAnisotropyConstant", 1e6).value,
+    ],
+)
 def test_classify_magnetic_from_Ms_A_K_single_input(Ms, A, Ku):
     """Test classification of magnetic materials from Ms, A, Ku."""
     classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
     assert classification in [True, False]
 
 
-@pytest.mark.parametrize("Ms", [me.Ms([1e6, 0.5e6]), me.Ms([1e6, 0.5e6]).q, me.Ms([1e6, 0.5e6]).value])
-@pytest.mark.parametrize("A", [me.A([1e-12, 2e-12]), me.A([1e-12, 2e-12]).q, me.A([1e-12, 2e-12]).value])
-@pytest.mark.parametrize("Ku", [me.Ku([1e6, 2e6]), me.Ku([1e6, 2e6]).q, me.Ku([1e6, 2e6]).value])
+@pytest.mark.parametrize(
+    "Ms",
+    [
+        me.Entity("SpontaneousMagnetization", [1e6, 0.5e6]),
+        me.Entity("SpontaneousMagnetization", [1e6, 0.5e6]).q,
+        me.Entity("SpontaneousMagnetization", [1e6, 0.5e6]).value,
+    ],
+)
+@pytest.mark.parametrize(
+    "A",
+    [
+        me.Entity("ExchangeStiffnessConstant", [1e-12, 2e-12]),
+        me.Entity("ExchangeStiffnessConstant", [1e-12, 2e-12]).q,
+        me.Entity("ExchangeStiffnessConstant", [1e-12, 2e-12]).value,
+    ],
+)
+@pytest.mark.parametrize(
+    "Ku",
+    [
+        me.Entity("UniaxialAnisotropyConstant", [1e6, 2e6]),
+        me.Entity("UniaxialAnisotropyConstant", [1e6, 2e6]).q,
+        me.Entity("UniaxialAnisotropyConstant", [1e6, 2e6]).value,
+    ],
+)
 def test_classify_magnetic_from_Ms_A_K_1d_array(Ms, A, Ku):
     """Test classification of magnetic materials from Ms, A, Ku."""
     classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
@@ -75,25 +121,25 @@ def test_classify_magnetic_from_Ms_A_K_1d_array(Ms, A, Ku):
 @pytest.mark.parametrize(
     "Ms",
     [
-        me.Ms([[1e5, 2e5], [3e5, 3.9e5]]),
-        me.Ms([[1e5, 2e5], [3e5, 3.9e5]]).q,
-        me.Ms([[1e5, 2e5], [3e5, 3.9e5]]).value,
+        me.Entity("SpontaneousMagnetization", [[1e5, 2e5], [3e5, 3.9e5]]),
+        me.Entity("SpontaneousMagnetization", [[1e5, 2e5], [3e5, 3.9e5]]).q,
+        me.Entity("SpontaneousMagnetization", [[1e5, 2e5], [3e5, 3.9e5]]).value,
     ],
 )
 @pytest.mark.parametrize(
     "A",
     [
-        me.A([[1e-12, 2e-12], [3e-12, 4e-12]]),
-        me.A([[1e-12, 2e-12], [3e-12, 4e-12]]).q,
-        me.A([[1e-12, 2e-12], [3e-12, 4e-12]]).value,
+        me.Entity("ExchangeStiffnessConstant", [[1e-12, 2e-12], [3e-12, 4e-12]]),
+        me.Entity("ExchangeStiffnessConstant", [[1e-12, 2e-12], [3e-12, 4e-12]]).q,
+        me.Entity("ExchangeStiffnessConstant", [[1e-12, 2e-12], [3e-12, 4e-12]]).value,
     ],
 )
 @pytest.mark.parametrize(
     "Ku",
     [
-        me.Ku([[1e5, 2e5], [3e5, 4e5]]),
-        me.Ku([[1e5, 2e5], [3e5, 4e5]]).q,
-        me.Ku([[1e5, 2e5], [3e5, 4e5]]).value,
+        me.Entity("UniaxialAnisotropyConstant", [[1e5, 2e5], [3e5, 4e5]]),
+        me.Entity("UniaxialAnisotropyConstant", [[1e5, 2e5], [3e5, 4e5]]).q,
+        me.Entity("UniaxialAnisotropyConstant", [[1e5, 2e5], [3e5, 4e5]]).value,
     ],
 )
 def test_classify_magnetic_from_Ms_A_K_nd_array(Ms, A, Ku):
@@ -111,27 +157,27 @@ def test_classify_magnetic_from_Ms_A_K_zeros():
 
 def test_classify_magnetic_from_Ms_A_K_soft():
     """Test classification of a soft magnetic material."""
-    Ms = me.Ms(1e6)
-    A = me.A(1e-12)
-    Ku = me.Ku(1e4)
+    Ms = me.Entity("SpontaneousMagnetization", 1e6)
+    A = me.Entity("ExchangeStiffnessConstant", 1e-12)
+    Ku = me.Entity("UniaxialAnisotropyConstant", 1e4)
     classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
     assert not classification
 
 
 def test_classify_magnetic_from_Ms_A_K_hard():
     """Test classification of a hard magnetic material."""
-    Ms = me.Ms(1e6)
-    A = me.A(1e-12)
-    Ku = me.Ku(1e6)
+    Ms = me.Entity("SpontaneousMagnetization", 1e6)
+    A = me.Entity("ExchangeStiffnessConstant", 1e-12)
+    Ku = me.Entity("UniaxialAnisotropyConstant", 1e6)
     classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
     assert classification
 
 
 def test_classify_magnetic_from_Ms_A_K_specify_model():
     """Test specifying different models for classification."""
-    Ms = me.Ms(1e6)
-    A = me.A(1e-12)
-    Ku = me.Ku(1e6)
+    Ms = me.Entity("SpontaneousMagnetization", 1e6)
+    A = me.Entity("ExchangeStiffnessConstant", 1e-12)
+    Ku = me.Entity("UniaxialAnisotropyConstant", 1e6)
 
     classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku, model="cube50_singlegrain_random_forest_v0.1")
     assert classification in [True, False]
@@ -142,9 +188,9 @@ def test_classify_magnetic_from_Ms_A_K_specify_model():
 
 def test_classify_magnetic_array_inputs():
     """Test that array inputs are processed correctly for classification."""
-    Ms = me.Ms([1e6, 1e6])
-    A = me.A([1e-12, 1e-12])
-    Ku = me.Ku([1e4, 1e6])
+    Ms = me.Entity("SpontaneousMagnetization", [1e6, 1e6])
+    A = me.Entity("ExchangeStiffnessConstant", [1e-12, 1e-12])
+    Ku = me.Entity("UniaxialAnisotropyConstant", [1e4, 1e6])
 
     classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
 
@@ -156,24 +202,45 @@ def test_classify_magnetic_array_inputs():
 
 def test_classify_magnetic_array_inputs_mixed_lengths():
     """Test that array inputs of mixed lengths raise an error."""
-    Ms = me.Ms(1e6)
-    A = me.A([1e-12, 1e-12])
-    Ku = me.Ku([1e3, 1e8])
+    Ms = me.Entity("SpontaneousMagnetization", 1e6)
+    A = me.Entity("ExchangeStiffnessConstant", [1e-12, 1e-12])
+    Ku = me.Entity("UniaxialAnisotropyConstant", [1e3, 1e8])
 
     with pytest.raises(ValueError, match="Input arrays must have the same shape"):
         mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
 
-    Ms = me.Ms([1e6])
-    A = me.A([1e-12, 2e-12])
-    Ku = me.Ku([1e3, 1e8])
+    Ms = me.Entity("SpontaneousMagnetization", [1e6])
+    A = me.Entity("ExchangeStiffnessConstant", [1e-12, 2e-12])
+    Ku = me.Entity("UniaxialAnisotropyConstant", [1e3, 1e8])
 
     with pytest.raises(ValueError, match="Input arrays must have the same shape"):
         mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, Ku)
 
 
-@pytest.mark.parametrize("Ms", [me.Ms(1e6), me.Ms(1e6).q, me.Ms(1e6).value])
-@pytest.mark.parametrize("A", [me.A(1e-12), me.A(1e-12).q, me.A(1e-12).value])
-@pytest.mark.parametrize("Ku", [me.Ku(1e6), me.Ku(1e6).q, me.Ku(1e6).value])
+@pytest.mark.parametrize(
+    "Ms",
+    [
+        me.Entity("SpontaneousMagnetization", 1e6),
+        me.Entity("SpontaneousMagnetization", 1e6).q,
+        me.Entity("SpontaneousMagnetization", 1e6).value,
+    ],
+)
+@pytest.mark.parametrize(
+    "A",
+    [
+        me.Entity("ExchangeStiffnessConstant", 1e-12),
+        me.Entity("ExchangeStiffnessConstant", 1e-12).q,
+        me.Entity("ExchangeStiffnessConstant", 1e-12).value,
+    ],
+)
+@pytest.mark.parametrize(
+    "Ku",
+    [
+        me.Entity("UniaxialAnisotropyConstant", 1e6),
+        me.Entity("UniaxialAnisotropyConstant", 1e6).q,
+        me.Entity("UniaxialAnisotropyConstant", 1e6).value,
+    ],
+)
 def test_Hc_Mr_BHmax_from_Ms_A_K_single_input(Ms, A, Ku):
     """Test Hc, Mr, BHmax prediction from Ms, A, Ku."""
     extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
@@ -197,14 +264,39 @@ def test_Hc_Mr_BHmax_from_Ms_A_K_single_input(Ms, A, Ku):
 )
 def test_Hc_Mr_BHmax_from_Ms_A_K_accepts_compatible_magnetization_entities(Ms):
     """Test prediction accepts spontaneous and saturation magnetization."""
-    extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, me.A(1e-12), me.Ku(1e6))
+    extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(
+        Ms,
+        me.Entity("ExchangeStiffnessConstant", 1e-12),
+        me.Entity("UniaxialAnisotropyConstant", 1e6),
+    )
 
     assert isinstance(extrinsic_properties, mammos_analysis.hysteresis.ExtrinsicProperties)
 
 
-@pytest.mark.parametrize("Ms", [me.Ms([1e5, 2e5]), me.Ms([1e5, 2e5]).q, me.Ms([1e5, 2e5]).value])
-@pytest.mark.parametrize("A", [me.A([1e-12, 2e-12]), me.A([1e-12, 2e-12]).q, me.A([1e-12, 2e-12]).value])
-@pytest.mark.parametrize("Ku", [me.Ku([1e5, 2e5]), me.Ku([1e5, 2e5]).q, me.Ku([1e5, 2e5]).value])
+@pytest.mark.parametrize(
+    "Ms",
+    [
+        me.Entity("SpontaneousMagnetization", [1e5, 2e5]),
+        me.Entity("SpontaneousMagnetization", [1e5, 2e5]).q,
+        me.Entity("SpontaneousMagnetization", [1e5, 2e5]).value,
+    ],
+)
+@pytest.mark.parametrize(
+    "A",
+    [
+        me.Entity("ExchangeStiffnessConstant", [1e-12, 2e-12]),
+        me.Entity("ExchangeStiffnessConstant", [1e-12, 2e-12]).q,
+        me.Entity("ExchangeStiffnessConstant", [1e-12, 2e-12]).value,
+    ],
+)
+@pytest.mark.parametrize(
+    "Ku",
+    [
+        me.Entity("UniaxialAnisotropyConstant", [1e5, 2e5]),
+        me.Entity("UniaxialAnisotropyConstant", [1e5, 2e5]).q,
+        me.Entity("UniaxialAnisotropyConstant", [1e5, 2e5]).value,
+    ],
+)
 def test_Hc_Mr_BHmax_from_Ms_A_K_1d_array(Ms, A, Ku):
     """Test Hc, Mr, BHmax prediction from Ms, A, Ku."""
     extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
@@ -222,9 +314,9 @@ def test_Hc_Mr_BHmax_from_Ms_A_K_1d_array(Ms, A, Ku):
 @pytest.mark.parametrize("model", ["cube50_singlegrain_random_forest_v0.1"])
 def test_Hc_Mr_BHmax_from_Ms_A_K_specify_model(model):
     """Test specifying different models for Hc, Mr, BHmax prediction."""
-    Ms = me.Ms(1e6)
-    A = me.A(1e-12)
-    Ku = me.Ku(1e6)
+    Ms = me.Entity("SpontaneousMagnetization", 1e6)
+    A = me.Entity("ExchangeStiffnessConstant", 1e-12)
+    Ku = me.Entity("UniaxialAnisotropyConstant", 1e6)
 
     extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku, model=model)
 
@@ -236,9 +328,9 @@ def test_Hc_Mr_BHmax_from_Ms_A_K_specify_model(model):
 
 def test_Hc_Mr_BHmax_2d_array_inputs():
     """Test that array inputs produce correct shape outputs for predictions."""
-    Ms = me.Ms([[1e5, 2e5], [3e5, 3.9e5]])
-    A = me.A([[1e-12, 2e-12], [3e-12, 4e-12]])
-    Ku = me.Ku([[1e5, 2e5], [3e5, 4e5]])
+    Ms = me.Entity("SpontaneousMagnetization", [[1e5, 2e5], [3e5, 3.9e5]])
+    A = me.Entity("ExchangeStiffnessConstant", [[1e-12, 2e-12], [3e-12, 4e-12]])
+    Ku = me.Entity("UniaxialAnisotropyConstant", [[1e5, 2e5], [3e5, 4e5]])
     extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
 
     assert isinstance(extrinsic_properties, mammos_analysis.hysteresis.ExtrinsicProperties)
@@ -254,9 +346,9 @@ def test_Hc_Mr_BHmax_2d_array_inputs():
 
 def test_Hc_Mr_BHmax_out_of_range_2d_array_inputs():
     """Test that out-of-training-range array inputs produce nan predictions."""
-    Ms = me.Ms([[1e6, 1e6], [1e6, 1e6]])
-    A = me.A([[1e-12, 1e-12], [1e-12, 1e-12]])
-    Ku = me.Ku([[1e4, 1e6], [1e3, 1e8]])
+    Ms = me.Entity("SpontaneousMagnetization", [[1e6, 1e6], [1e6, 1e6]])
+    A = me.Entity("ExchangeStiffnessConstant", [[1e-12, 1e-12], [1e-12, 1e-12]])
+    Ku = me.Entity("UniaxialAnisotropyConstant", [[1e4, 1e6], [1e3, 1e8]])
 
     extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
 
@@ -275,16 +367,16 @@ def test_Hc_Mr_BHmax_out_of_range_2d_array_inputs():
 
 def test_Hc_Mr_BHmax_array_inputs_mixed_lengths():
     """Test that array inputs of mixed lengths raise an error."""
-    Ms = me.Ms(1e6)
-    A = me.A([1e-12, 2e-12])
-    Ku = me.Ku([1e6, 2e6])
+    Ms = me.Entity("SpontaneousMagnetization", 1e6)
+    A = me.Entity("ExchangeStiffnessConstant", [1e-12, 2e-12])
+    Ku = me.Entity("UniaxialAnisotropyConstant", [1e6, 2e6])
 
     with pytest.raises(ValueError, match="Input arrays must have the same shape"):
         mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)
 
-    Ms = me.Ms([1e6])
-    A = me.A([1e-12, 2e-12])
-    Ku = me.Ku([1e6, 2e6])
+    Ms = me.Entity("SpontaneousMagnetization", [1e6])
+    A = me.Entity("ExchangeStiffnessConstant", [1e-12, 2e-12])
+    Ku = me.Entity("UniaxialAnisotropyConstant", [1e6, 2e6])
 
     with pytest.raises(ValueError, match="Input arrays must have the same shape"):
         mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(Ms, A, Ku)

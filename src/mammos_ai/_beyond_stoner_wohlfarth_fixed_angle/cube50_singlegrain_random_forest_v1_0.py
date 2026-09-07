@@ -42,11 +42,23 @@ _TRAINING_SOURCE = (
 
 _TRAINING_DATA_RANGE = {
     "Ms": (
-        me.Ms((0.1 * u.T).to(u.A / u.m, equivalencies=u.magnetic_flux_field())),
-        me.Ms((5.0 * u.T).to(u.A / u.m, equivalencies=u.magnetic_flux_field())),
+        me.Entity(
+            "SpontaneousMagnetization",
+            (0.1 * u.T).to(u.A / u.m, equivalencies=u.magnetic_flux_field()),
+        ),
+        me.Entity(
+            "SpontaneousMagnetization",
+            (5.0 * u.T).to(u.A / u.m, equivalencies=u.magnetic_flux_field()),
+        ),
     ),
-    "A": (me.A(1e-13), me.A(1e-11)),
-    "K": (me.Ku(1e4), me.Ku(1e7)),
+    "A": (
+        me.Entity("ExchangeStiffnessConstant", 1e-13),
+        me.Entity("ExchangeStiffnessConstant", 1e-11),
+    ),
+    "K": (
+        me.Entity("UniaxialAnisotropyConstant", 1e4),
+        me.Entity("UniaxialAnisotropyConstant", 1e7),
+    ),
 }
 
 
