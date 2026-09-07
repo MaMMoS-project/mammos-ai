@@ -250,8 +250,11 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
         model: AI model used for the prediction
 
     Returns:
-        An entity collection with intrinsic parameters Ms :entity:`SpontaneousMagnetization`,
-        A :entity:`ExchangeStiffnessConstant`, K1 :entity:`MagnetocrystallineAnisotropyConstantK1`.
+        An entity collection with intrinsic parameters
+
+        - Ms :entity:`SpontaneousMagnetization`,
+        - A :entity:`ExchangeStiffnessConstant`,
+        - K1 :entity:`MagnetocrystallineAnisotropyConstantK1`.
 
     Examples:
         >>> import mammos_ai
