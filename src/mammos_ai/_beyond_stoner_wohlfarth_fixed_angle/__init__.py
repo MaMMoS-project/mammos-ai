@@ -267,7 +267,7 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
     """
     m = _choose_model(model)
     if not hasattr(m, "predict_intrinsic"):
-        raise NotImplementedError(f"Model {model} cannot predict Hc, Mr or BHmax.")
+        raise NotImplementedError(f"Model {model} cannot predict Ms, A or K1.")
     Hc_arr, Mr_arr, BHmax_arr = prepare_Hc_Mr_BHmax(Hc, Mr, BHmax)
     Ms, A, K1 = m.predict_intrinsic(Hc_arr, Mr_arr, BHmax_arr)
     return me.EntityCollection(
