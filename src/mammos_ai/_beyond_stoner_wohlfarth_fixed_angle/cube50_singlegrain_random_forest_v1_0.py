@@ -30,7 +30,6 @@ FILENAMES = {
     "inverse": "hard_cube50_inversesinglegrain_random_forest_v1.0.onnx",
 }
 
-
 _DESCRIPTION = (
     "Random forest model trained on extended simulated data for single grain "
     "cubic particles with 50 nm edge length with the external field "
