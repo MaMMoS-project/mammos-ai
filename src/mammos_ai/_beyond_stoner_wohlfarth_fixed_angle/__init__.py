@@ -231,7 +231,7 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
 
     The following models are available for the prediction:
 
-    - ``cube50_inversesinglegrain_random_forest_v1.0``: Random forest model trained on extended
+    - ``cube50_singlegrain_random_forest_v1.0``: Random forest model trained on extended
       simulated data for single grain cubic particles with 50 nm edge length with
       the external field applied parallel to the anisotropy axis. These are both
       aligned along an edge of the cube. Further details on the training data
@@ -256,7 +256,11 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
     Examples:
         >>> import mammos_ai
         >>> import mammos_entity as me
-        >>> dat = mammos_ai.Ms_A_K1_from_Hc_Mr_BHmax(me.Hc(1e4), me.Mr(1e6), me.BHmax(200e3))
+        >>> dat = mammos_ai.Ms_A_K1_from_Hc_Mr_BHmax(
+        ...     me.Entity("CoercivityHcExternal", 1e4, "A/m"),
+        ...     me.Entity("Remanence", 1e6, "A/m"),
+        ...     me.Entity("MaximumEnergyProduct", 200e3, "J/m^3"),
+        ... )
         >>> dat  # doctest: +ELLIPSIS
         EntityCollection(
             description='',
