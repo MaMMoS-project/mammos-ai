@@ -41,7 +41,7 @@ _TRAINING_SOURCE = (
 _TRAINING_DATA_RANGE = {
     "Ms": (me.Ms(79.58e3), me.Ms(3.98e6)),
     "A": (me.A(1e-13), me.A(1e-11)),
-    "K": (me.Ku(1e4), me.Ku(1e7)),
+    "K1": (me.K1(1e4), me.K1(1e7)),
 }
 
 CLASSIFY_METADATA = {
@@ -81,15 +81,15 @@ def _in_training_range(Ms_arr, A_arr, K1_arr) -> np.ndarray:
     """Check if each sample is within the training data range for all parameters."""
     Ms_min, Ms_max = (value.q.to_value("A/m") for value in _TRAINING_DATA_RANGE["Ms"])
     A_min, A_max = (value.q.to_value("J/m") for value in _TRAINING_DATA_RANGE["A"])
-    K_min, K_max = (value.q.to_value("J/m3") for value in _TRAINING_DATA_RANGE["K"])
+    K1_min, K1_max = (value.q.to_value("J/m3") for value in _TRAINING_DATA_RANGE["K1"])
 
     in_range = (
         (Ms_arr >= Ms_min)
         & (Ms_arr <= Ms_max)
         & (A_arr >= A_min)
         & (A_arr <= A_max)
-        & (K1_arr >= K_min)
-        & (K1_arr <= K_max)
+        & (K1_arr >= K1_min)
+        & (K1_arr <= K1_max)
     )
     return in_range
 
