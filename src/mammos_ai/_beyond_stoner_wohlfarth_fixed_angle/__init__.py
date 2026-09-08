@@ -154,7 +154,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
       trained on hard magnet data only for single grain cubic particles with 50
       nm edge length with the external field applied parallel to the anisotropy
       axis. Further details on the training data can be found in the
-      `training repository <https://w3id.org/emmo/domain/magnetic-materials#EMMO_032731f8-874d-5efb-9c9d-6dafaa17ef25>`_
+      `training repository <https://github.com/MaMMoS-project/mammos-mm-surrogate-paper>`_
       and in the `publication <https://doi.org/10.48550/arXiv.2607.29249>`_.
 
     - ``cube50_singlegrain_random_forest_v1.0``: Random forest model trained on extended
