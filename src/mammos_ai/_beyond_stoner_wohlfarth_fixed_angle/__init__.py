@@ -19,12 +19,17 @@ if TYPE_CHECKING:
 import mammos_analysis
 import mammos_entity as me
 
-from . import cube50_singlegrain_random_forest_v0_1, cube50_singlegrain_random_forest_v1_0
+from . import (
+    cube50_singlegrain_random_forest_v0_1,
+    cube50_singlegrain_random_forest_v1_0,
+    cube50_singlegrain_symbolic_regression_v1_0,
+)
 from ._common import prepare_Ms_A_K1
 
 _REGISTRY = {
     "cube50_singlegrain_random_forest_v0.1": cube50_singlegrain_random_forest_v0_1,
     "cube50_singlegrain_random_forest_v1.0": cube50_singlegrain_random_forest_v1_0,
+    "cube50_singlegrain_symbolic_regression_v1.0": cube50_singlegrain_symbolic_regression_v1_0,
 }
 
 
@@ -145,6 +150,13 @@ def Hc_Mr_BHmax_from_Ms_A_K(
 
     The following models are available for the prediction:
 
+    - ``cube50_singlegrain_symbolic_regression_v1.0``: Symbolic regression model
+      trained on hard magnet data only for single grain cubic particles with 50
+      nm edge length with the external field applied parallel to the anisotropy
+      axis. Further details on the training data can be found in the
+      `training repository <https://github.com/MaMMoS-project/mammos-mm-surrogate-paper>`_
+      and in the `publication <https://doi.org/10.48550/arXiv.2607.29249>`_.
+
     - ``cube50_singlegrain_random_forest_v1.0``: Random forest model trained on extended
       simulated data for single grain cubic particles with 50 nm edge length with
       the external field applied parallel to the anisotropy axis. These are both
@@ -188,6 +200,7 @@ def Hc_Mr_BHmax_from_Ms_A_K(
         ... )
         ExtrinsicProperties(Hc=..., Mr=..., BHmax=...)
     """
+    # TODO: use paper DOI for model `cube_50_singlegrain_symbolic_regression_v1.0` when published.
     m = _choose_model(model)
     if not hasattr(m, "predict_extrinsic"):
         raise NotImplementedError(f"Model {model} cannot predict Hc, Mr or BHmax.")

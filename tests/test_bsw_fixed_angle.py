@@ -255,6 +255,25 @@ def test_Hc_Mr_BHmax_from_Ms_A_K_single_input(Ms, A, Ku):
     assert np.all(extrinsic_properties.BHmax.q > 0)
 
 
+@pytest.mark.parametrize("Ms", [me.Ms(1e6), me.Ms(1e6).q, me.Ms(1e6).value])
+@pytest.mark.parametrize("A", [me.A(1e-12), me.A(1e-12).q, me.A(1e-12).value])
+@pytest.mark.parametrize("Ku", [me.Ku(1e6), me.Ku(1e6).q, me.Ku(1e6).value])
+def test_symbolic_regression_Hc_Mr_BHmax_from_Ms_A_K_single_input(Ms, A, Ku):
+    """Test Hc, Mr, BHmax prediction from Ms, A, Ku using the symbolic regression model."""
+    extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(
+        Ms, A, Ku, model="cube50_singlegrain_symbolic_regression_v1.0"
+    )
+
+    assert isinstance(extrinsic_properties, mammos_analysis.hysteresis.ExtrinsicProperties)
+    assert isinstance(extrinsic_properties.Hc, me.Entity)
+    assert isinstance(extrinsic_properties.Mr, me.Entity)
+    assert isinstance(extrinsic_properties.BHmax, me.Entity)
+
+    assert np.all(extrinsic_properties.Hc.q > 0)
+    assert np.all(extrinsic_properties.Mr.q > 0)
+    assert np.all(extrinsic_properties.BHmax.q > 0)
+
+
 @pytest.mark.parametrize(
     "Ms",
     [
