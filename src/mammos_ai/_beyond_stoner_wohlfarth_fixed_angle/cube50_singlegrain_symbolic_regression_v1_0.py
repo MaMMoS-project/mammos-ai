@@ -38,7 +38,7 @@ _TRAINING_DATA_RANGE = {
 _MODEL_SOURCE = "https://doi.org/10.48550/arXiv.2607.29249"
 # TODO: add paper DOI when published
 
-_TRAINING_SOURCE = "https://w3id.org/emmo/domain/magnetic-materials#EMMO_032731f8-874d-5efb-9c9d-6dafaa17ef25"
+_TRAINING_SOURCE = "https://github.com/MaMMoS-project/mammos-mm-surrogate-paper"
 
 PREDICT_METADATA = {
     "model_name": NAME,
