@@ -19,8 +19,11 @@ if TYPE_CHECKING:
 import mammos_analysis
 import mammos_entity as me
 
-from . import cube50_singlegrain_random_forest_v0_1, cube50_singlegrain_random_forest_v1_0
-from ._common import prepare_Ms_A_K1
+from . import (
+    cube50_singlegrain_random_forest_v0_1,
+    cube50_singlegrain_random_forest_v1_0,
+)
+from ._common import prepare_Hc_Mr_BHmax, prepare_Ms_A_K1
 
 _REGISTRY = {
     "cube50_singlegrain_random_forest_v0.1": cube50_singlegrain_random_forest_v0_1,
@@ -63,7 +66,7 @@ def is_hard_magnet_from_Ms_A_K(
 
     The following models are available for the prediction:
 
-    - ``cube50_singlegrain_random_forest_v1.0``: Random forest model trained on extended
+    - ``cube50_inversesinglegrain_random_forest_v1.0``: Random forest model trained on extended
       simulated data for single grain cubic particles with 50 nm edge length with
       the external field applied parallel to the anisotropy axis. These are both
       aligned along an edge of the cube. Further details on the training data
@@ -213,3 +216,69 @@ def Hc_Mr_BHmax_from_Ms_A_K_metadata(
     if not hasattr(m, "PREDICT_METADATA"):
         raise NotImplementedError(f"Model {model} does not provide Hc, Mr or BHmax prediction metadata.")
     return m.PREDICT_METADATA
+
+
+def Ms_A_K1_from_Hc_Mr_BHmax(
+    Hc: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
+    Mr: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
+    BHmax: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
+    model: str = "cube50_singlegrain_random_forest_v1.0",
+) -> mammos_entity.EntityCollection:
+    """Predict Ms, A and K1 from hysteresis properties Hc, Mr and BHmax.
+
+    This function predicts intrinsic properties saturation magnetization Ms, exchange stiffness
+    A and anisotropy constant K1 given a set of characteristic hysteresis parameters.
+
+    The following models are available for the prediction:
+
+    - ``cube50_singlegrain_random_forest_v1.0``: Random forest model trained on extended
+      simulated data for single grain cubic particles with 50 nm edge length with
+      the external field applied parallel to the anisotropy axis. These are both
+      aligned along an edge of the cube. Further details on the training data
+      can be found in the
+      `training repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/inverse-single-grain-easy-axis-model>`_.
+      Model files are downloaded from the
+      `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
+
+    Args:
+        Hc: :entity:`CoercivityHcExternal`.
+            If no unit is provided, values are interpreted as 'A/m'.
+        Mr: :entity:`Remanence`.
+            If no unit is provided, values are interpreted as 'A/m'.
+        BHmax: :entity:`MaximumEnergyProduct`.
+            If no unit is provided, values are interpreted as 'J/m^3'.
+        model: AI model used for the prediction
+
+    Returns:
+        An entity collection with intrinsic parameters
+
+        - Ms :entity:`SpontaneousMagnetization`,
+        - A :entity:`ExchangeStiffnessConstant`,
+        - K1 :entity:`MagnetocrystallineAnisotropyConstantK1`.
+
+    Examples:
+        >>> import mammos_ai
+        >>> import mammos_entity as me
+        >>> dat = mammos_ai.Ms_A_K1_from_Hc_Mr_BHmax(
+        ...     me.Entity("CoercivityHcExternal", 1e4, "A/m"),
+        ...     me.Entity("Remanence", 1e6, "A/m"),
+        ...     me.Entity("MaximumEnergyProduct", 200e3, "J/m^3"),
+        ... )
+        >>> dat  # doctest: +ELLIPSIS
+        EntityCollection(
+            description='',
+            Ms=Entity(ontology_label='SpontaneousMagnetization', value=..., unit='A / m'),
+            A=Entity(ontology_label='ExchangeStiffnessConstant', value=..., unit='J / m'),
+            K1=Entity(ontology_label='MagnetocrystallineAnisotropyConstantK1', value=..., unit='J / m3'),
+        )
+    """
+    m = _choose_model(model)
+    if not hasattr(m, "predict_intrinsic"):
+        raise NotImplementedError(f"Model {model} cannot predict Ms, A or K1.")
+    Hc_arr, Mr_arr, BHmax_arr = prepare_Hc_Mr_BHmax(Hc, Mr, BHmax)
+    Ms, A, K1 = m.predict_intrinsic(Hc_arr, Mr_arr, BHmax_arr)
+    return me.EntityCollection(
+        Ms=me.Entity("SpontaneousMagnetization", Ms, "A/m"),
+        A=me.Entity("ExchangeStiffnessConstant", A, "J/m"),
+        K1=me.Entity("MagnetocrystallineAnisotropyConstantK1", K1, "J/m3"),
+    )
