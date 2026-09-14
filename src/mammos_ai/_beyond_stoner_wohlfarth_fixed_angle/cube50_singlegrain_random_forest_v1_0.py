@@ -27,7 +27,7 @@ FILENAMES = {
     "classifier_hard_soft": "classifier_hard_soft_cube50_singlegrain_random_forest_v1.0.onnx",
     "soft": "soft_cube50_singlegrain_random_forest_v1.0.onnx",
     "hard": "hard_cube50_singlegrain_random_forest_v1.0.onnx",
-    "inverse": "hard_cube50_inversesinglegrain_random_forest_v1.0.onnx",
+    "inverse": "inverse_hard_cube50_singlegrain_random_forest_v1.0.onnx",
 }
 
 _DESCRIPTION = (
