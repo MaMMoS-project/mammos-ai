@@ -47,7 +47,7 @@ _TRAINING_DATA_RANGE = {
         me.Entity("ExchangeStiffnessConstant", 1e-13),
         me.Entity("ExchangeStiffnessConstant", 1e-11),
     ),
-    "K": (
+    "K1": (
         me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e4),
         me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e7),
     ),

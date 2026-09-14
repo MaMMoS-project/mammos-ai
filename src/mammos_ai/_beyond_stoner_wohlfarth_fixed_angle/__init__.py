@@ -106,7 +106,7 @@ def is_hard_magnet_from_Ms_A_K1(
     Examples:
         >>> import mammos_ai
         >>> import mammos_entity as me
-        >>> mammos_ai.is_hard_magnet_from_Ms_A_K(
+        >>> mammos_ai.is_hard_magnet_from_Ms_A_K1(
         ...     me.Entity("SpontaneousMagnetization", 1e6),
         ...     me.Entity("ExchangeStiffnessConstant", 1e-12),
         ...     me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e6),
@@ -191,7 +191,7 @@ def Hc_Mr_BHmax_from_Ms_A_K1(
     Examples:
         >>> import mammos_ai
         >>> import mammos_entity as me
-        >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K(
+        >>> mammos_ai.Hc_Mr_BHmax_from_Ms_A_K1(
         ...     me.Entity("SpontaneousMagnetization", 1e6),
         ...     me.Entity("ExchangeStiffnessConstant", 1e-12),
         ...     me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e6),
