@@ -112,7 +112,7 @@ def test_classify_magnetic_from_Ms_A_K1_single_input(Ms, A, K1):
 )
 def test_classify_magnetic_from_Ms_A_K1_1d_array(Ms, A, K1):
     """Test classification of magnetic materials from Ms, A, K1."""
-    classification = mammos_ai.is_hard_magnet_from_Ms_A_K(Ms, A, K1)
+    classification = mammos_ai.is_hard_magnet_from_Ms_A_K1(Ms, A, K1)
     assert isinstance(classification, np.ndarray)
     assert classification.shape == (2,)
     assert all(c in [True, False] for c in classification)
