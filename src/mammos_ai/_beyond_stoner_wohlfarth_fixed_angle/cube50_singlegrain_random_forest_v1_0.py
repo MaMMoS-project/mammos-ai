@@ -148,7 +148,9 @@ def is_hard_magnet(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) ->
     return labels.reshape(Ms_arr.shape)
 
 
-def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) -> np.ndarray:
+def predict_extrinsic(
+    Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Predict Hc, Mr and BHmax for each sample.
 
     Args:
@@ -157,8 +159,9 @@ def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray)
         K1_arr: Uniaxial anisotropy values in J/m^3.
 
     Returns:
-        Array of shape ``(N, 3)`` containing ``[Hc, Mr, BHmax]`` predictions in
-        SI units.
+        A tuple ``(Hc, Mr, BHmax)`` containing the predicted coercive field,
+        remanence, and maximum energy product in SI units. Each array has the
+        same shape as the input arrays.
     """
     mat_class = is_hard_magnet(Ms_arr, A_arr, K1_arr)
 
@@ -184,7 +187,9 @@ def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray)
     return Hc_val, Mr_val, BHmax_val
 
 
-def predict_intrinsic(Hc_arr: np.ndarray, Mr_arr: np.ndarray, BHmax_arr: np.ndarray) -> np.ndarray:
+def predict_intrinsic(
+    Hc_arr: np.ndarray, Mr_arr: np.ndarray, BHmax_arr: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Predict Ms, A and K1 for each sample.
 
     Args:
@@ -193,8 +198,9 @@ def predict_intrinsic(Hc_arr: np.ndarray, Mr_arr: np.ndarray, BHmax_arr: np.ndar
         BHmax_arr: Maximum Energy Product values in J/m^3.
 
     Returns:
-        Array of shape ``(N, 3)`` containing ``[Ms, A, K]`` predictions in
-        SI units.
+        A tuple ``(Ms, A, K1)`` containing the predicted saturation magnetization,
+        exchange stiffness constant, and uniaxial ansitropy constant in SI units. Each array has the
+        same shape as the input arrays.
     """
     X_log = np.log1p(np.column_stack([Hc_arr.ravel(), Mr_arr.ravel(), BHmax_arr.ravel()]).astype(np.float32))
     y_log = np.full((X_log.shape[0], 3), np.nan, dtype=np.float32)
