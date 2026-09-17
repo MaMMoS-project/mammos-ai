@@ -27,6 +27,7 @@ FILENAMES = {
     "classifier_hard_soft": "classifier_hard_soft_cube50_singlegrain_random_forest_v1.0.onnx",
     "soft": "soft_cube50_singlegrain_random_forest_v1.0.onnx",
     "hard": "hard_cube50_singlegrain_random_forest_v1.0.onnx",
+    "inverse": "inverse_hard_cube50_singlegrain_random_forest_v1.0.onnx",
 }
 
 _DESCRIPTION = (
@@ -147,7 +148,9 @@ def is_hard_magnet(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) ->
     return labels.reshape(Ms_arr.shape)
 
 
-def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) -> np.ndarray:
+def predict_extrinsic(
+    Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Predict Hc, Mr and BHmax for each sample.
 
     Args:
@@ -156,8 +159,9 @@ def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray)
         K1_arr: Uniaxial anisotropy values in J/m^3.
 
     Returns:
-        Array of shape ``(N, 3)`` containing ``[Hc, Mr, BHmax]`` predictions in
-        SI units.
+        A tuple ``(Hc, Mr, BHmax)`` containing the predicted coercive field,
+        remanence, and maximum energy product in SI units. Each array has the
+        same shape as the input arrays.
     """
     mat_class = is_hard_magnet(Ms_arr, A_arr, K1_arr)
 
@@ -181,3 +185,35 @@ def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray)
     Mr_val = out[..., 1]
     BHmax_val = out[..., 2]
     return Hc_val, Mr_val, BHmax_val
+
+
+def predict_intrinsic(
+    Hc_arr: np.ndarray, Mr_arr: np.ndarray, BHmax_arr: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Predict Ms, A and K1 for each sample.
+
+    Args:
+        Hc_arr: Coercive field values in A/m.
+        Mr_arr: Remanence values in A/m.
+        BHmax_arr: Maximum Energy Product values in J/m^3.
+
+    Returns:
+        A tuple ``(Ms, A, K1)`` containing the predicted saturation magnetization,
+        exchange stiffness constant, and uniaxial ansitropy constant in SI units. Each array has the
+        same shape as the input arrays.
+    """
+    X_log = np.log1p(np.column_stack([Hc_arr.ravel(), Mr_arr.ravel(), BHmax_arr.ravel()]).astype(np.float32))
+    y_log = np.full((X_log.shape[0], 3), np.nan, dtype=np.float32)
+
+    # NOTE: assumes hard magnet TODO: discuss
+    path = _model_path("inverse")
+    session = ort.InferenceSession(path, SESSION_OPTIONS)
+    res = session.run(None, {session.get_inputs()[0].name: X_log})[0]
+    y_log = res
+
+    # inverse log-tf
+    out = np.expm1(y_log).reshape(Hc_arr.shape + (3,))
+    Ms_val = out[..., 0]
+    A_val = out[..., 1]
+    K1_val = out[..., 2]
+    return Ms_val, A_val, K1_val
