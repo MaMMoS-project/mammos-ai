@@ -19,10 +19,7 @@ if TYPE_CHECKING:
 import mammos_analysis
 import mammos_entity as me
 
-from . import (
-    cube50_singlegrain_random_forest_v0_1,
-    cube50_singlegrain_random_forest_v1_0,
-)
+from . import cube50_singlegrain_random_forest_v0_1, cube50_singlegrain_random_forest_v1_0
 from ._common import prepare_Hc_Mr_BHmax, prepare_Ms_A_K1
 
 _REGISTRY = {
