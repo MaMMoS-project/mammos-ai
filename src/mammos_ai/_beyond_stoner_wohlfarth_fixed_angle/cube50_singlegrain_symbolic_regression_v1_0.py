@@ -32,7 +32,7 @@ _TRAINING_DATA_RANGE = {
         me.Ms((5.0 * u.T).to(u.A / u.m, equivalencies=u.magnetic_flux_field())),
     ),
     "A": (me.A(1e-13), me.A(1e-11)),
-    "K": (me.Ku(1e4), me.Ku(1e7)),
+    "K1": (me.K1(1e4), me.K1(1e7)),
 }
 
 _MODEL_SOURCE = "https://doi.org/10.48550/arXiv.2607.29249"
@@ -55,15 +55,15 @@ def _in_training_range(Ms_arr, A_arr, K1_arr) -> np.ndarray:
     """Check if each sample is within the training data range for all parameters."""
     Ms_min, Ms_max = (value.q.to_value("A/m") for value in _TRAINING_DATA_RANGE["Ms"])
     A_min, A_max = (value.q.to_value("J/m") for value in _TRAINING_DATA_RANGE["A"])
-    K_min, K_max = (value.q.to_value("J/m3") for value in _TRAINING_DATA_RANGE["K"])
+    K1_min, K1_max = (value.q.to_value("J/m3") for value in _TRAINING_DATA_RANGE["K1"])
 
     in_range = (
         (Ms_arr >= Ms_min)
         & (Ms_arr <= Ms_max)
         & (A_arr >= A_min)
         & (A_arr <= A_max)
-        & (K1_arr >= K_min)
-        & (K1_arr <= K_max)
+        & (K1_arr >= K1_min)
+        & (K1_arr <= K1_max)
     )
     with np.errstate(divide="ignore", invalid="ignore"):
         l_A = np.sqrt(2 * A_arr / (u.constants.mu0.value * Ms_arr**2))
@@ -84,7 +84,7 @@ def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray)
     * the anisotropy field:
 
       .. math::
-        H_{\mathrm{A}} := \frac{2K}{\mu_0 M_{\mathrm{s}}},
+        H_{\mathrm{A}} := \frac{2K_1}{\mu_0 M_{\mathrm{s}}},
 
     * the energy product scaling variable:
 
@@ -94,7 +94,7 @@ def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray)
     * the hardness parameter
 
       .. math::
-        \kappa := \sqrt{\frac{K}{\mu_0 M_{\mathrm{s}}^2}},
+        \kappa := \sqrt{\frac{K_1}{\mu_0 M_{\mathrm{s}}^2}},
 
     * the exchange length:
 
