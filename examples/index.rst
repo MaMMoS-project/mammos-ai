@@ -5,3 +5,4 @@ mammos-ai
    :maxdepth: 1
 
    quickstart
+   symbolic_regression
