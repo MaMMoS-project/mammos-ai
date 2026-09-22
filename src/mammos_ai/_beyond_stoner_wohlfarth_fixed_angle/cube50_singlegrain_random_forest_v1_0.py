@@ -55,9 +55,9 @@ _TRAINING_DATA_RANGE = {
         me.Entity("ExchangeStiffnessConstant", 1e-13),
         me.Entity("ExchangeStiffnessConstant", 1e-11),
     ),
-    "K": (
-        me.Entity("UniaxialAnisotropyConstant", 1e4),
-        me.Entity("UniaxialAnisotropyConstant", 1e7),
+    "K1": (
+        me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e4),
+        me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e7),
     ),
 }
 
@@ -99,15 +99,15 @@ def _in_training_range(Ms_arr, A_arr, K1_arr) -> np.ndarray:
     """Check if each sample is within the training data range for all parameters."""
     Ms_min, Ms_max = (value.q.to_value("A/m") for value in _TRAINING_DATA_RANGE["Ms"])
     A_min, A_max = (value.q.to_value("J/m") for value in _TRAINING_DATA_RANGE["A"])
-    K_min, K_max = (value.q.to_value("J/m3") for value in _TRAINING_DATA_RANGE["K"])
+    K1_min, K1_max = (value.q.to_value("J/m3") for value in _TRAINING_DATA_RANGE["K1"])
 
     in_range = (
         (Ms_arr >= Ms_min)
         & (Ms_arr <= Ms_max)
         & (A_arr >= A_min)
         & (A_arr <= A_max)
-        & (K1_arr >= K_min)
-        & (K1_arr <= K_max)
+        & (K1_arr >= K1_min)
+        & (K1_arr <= K1_max)
     )
     with np.errstate(divide="ignore", invalid="ignore"):
         l_A = np.sqrt(2 * A_arr / (u.constants.mu0.value * Ms_arr**2))
