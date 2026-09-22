@@ -158,7 +158,8 @@ def Hc_Mr_BHmax_from_Ms_A_K1(
     - ``cube50_singlegrain_symbolic_regression_v1.0``: Symbolic regression model
       trained on hard magnet data only for single grain cubic particles with 50
       nm edge length with the external field applied parallel to the anisotropy
-      axis. Further details on the training data can be found in the
+      axis. This model consists of a set of equations, assumed to be correct
+      for hard magnets only. Further details on the training data can be found in the
       `training repository <https://github.com/MaMMoS-project/mammos-mm-surrogate-paper>`_
       and in the `publication <https://doi.org/10.48550/arXiv.2607.29249>`_.
 

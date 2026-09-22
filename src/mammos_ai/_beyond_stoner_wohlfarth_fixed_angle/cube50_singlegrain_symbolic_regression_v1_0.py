@@ -91,7 +91,8 @@ def _in_training_range(Ms_arr, A_arr, K1_arr) -> np.ndarray:
 def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) -> np.ndarray:
     r"""Predict Hc, Mr and BHmax for each sample.
 
-    The model works with the following rescaling quantities:
+    This model is supposed to be correct on hard magnets only.
+    The following rescaling quantities are defined:
 
     * the anisotropy field:
 
@@ -117,7 +118,7 @@ def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray)
       .. math::
         \tilde{L} := \frac{L}{\ell_{\mathrm{ex}}}.
 
-    Then, the model defines the following extrinsic properties:
+    Then, the extrinsic properties are given as:
 
       .. math::
         H_\mathrm{c} = \left[\alpha - n\,\frac{\ln\tilde{L}}{\kappa}\right] H_\mathrm{A}, \\
