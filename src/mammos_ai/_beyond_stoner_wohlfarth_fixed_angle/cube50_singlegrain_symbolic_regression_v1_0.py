@@ -28,11 +28,23 @@ _DESCRIPTION = (
 
 _TRAINING_DATA_RANGE = {
     "Ms": (
-        me.Ms((0.1 * u.T).to(u.A / u.m, equivalencies=u.magnetic_flux_field())),
-        me.Ms((5.0 * u.T).to(u.A / u.m, equivalencies=u.magnetic_flux_field())),
+        me.Entity(
+            "SpontaneousMagnetization",
+            (0.1 * u.T).to(u.A / u.m, equivalencies=u.magnetic_flux_field()),
+        ),
+        me.Entity(
+            "SpontaneousMagnetization",
+            (5.0 * u.T).to(u.A / u.m, equivalencies=u.magnetic_flux_field()),
+        ),
     ),
-    "A": (me.A(1e-13), me.A(1e-11)),
-    "K1": (me.K1(1e4), me.K1(1e7)),
+    "A": (
+        me.Entity("ExchangeStiffnessConstant", 1e-13),
+        me.Entity("ExchangeStiffnessConstant", 1e-11),
+    ),
+    "K1": (
+        me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e4),
+        me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e7),
+    ),
 }
 
 _MODEL_SOURCE = "https://doi.org/10.48550/arXiv.2607.29249"
