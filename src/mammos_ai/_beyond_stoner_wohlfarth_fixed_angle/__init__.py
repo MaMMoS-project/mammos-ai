@@ -246,7 +246,7 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
             If no unit is provided, values are interpreted as 'A/m'.
         BHmax: :entity:`MaximumEnergyProduct`.
             If no unit is provided, values are interpreted as 'J/m^3'.
-        model: AI model used for the prediction
+        model: AI model used for the prediction.
 
     Returns:
         An entity collection with intrinsic parameters
