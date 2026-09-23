@@ -7,9 +7,6 @@ import mammos_ai
 from mammos_ai._beyond_stoner_wohlfarth_fixed_angle import (
     cube50_singlegrain_random_forest_v0_1 as cube50_model,
 )
-from mammos_ai._beyond_stoner_wohlfarth_fixed_angle import (
-    cube50_singlegrain_random_forest_v1_0 as cube50_inverse_model,
-)
 
 
 def test_in_training_range_2d_array_inputs():
