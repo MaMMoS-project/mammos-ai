@@ -24,7 +24,7 @@ def prepare_Ms_A_K1(
     A: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
     K1: mammos_entity.Entity | mammos_units.Quantity | numpy.typing.ArrayLike,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Turn (Ms, A, K1) inputs into numpy value arrays in SI units.
+    r"""Turn (Ms, A, K1) inputs into numpy value arrays in SI units.
 
     Args:
         Ms: :entity:`SpontaneousMagnetization` or
@@ -32,8 +32,13 @@ def prepare_Ms_A_K1(
             If no unit is provided, values are interpreted as 'A/m'.
         A: :entity:`ExchangeStiffnessConstant`.
             If no unit is provided, values are interpreted as 'J/m'.
-        K1: :entity:`UniaxialAnisotropyConstant`.
-            If no unit is provided, values are interpreted as 'J/m^3'.
+        K1: First uniaxial magnetocrystalline anisotropy constant, defined by
+            the uniaxial anisotropy energy density :math:`K_1 \sin^2(\theta)`,
+            where :math:`\theta` is the angle between the anisotropy axis and
+            the magnetization. Possible compatible entities are
+            :entity:`MagnetocrystallineAnisotropyConstantK1` and
+            :entity:`UniaxialAnisotropyConstant`, and internally the former will
+            be used. If no unit is provided, values are interpreted as J/m^3.
 
     Returns:
         ``(Ms_arr, A_arr, K1_arr)``. The arrays use SI units.
@@ -45,7 +50,13 @@ def prepare_Ms_A_K1(
         "SpontaneousMagnetization", "A/m", compatible_entities=("SaturationMagnetization",), Ms=Ms, enforce_unit=True
     )
     A = me._entity.from_compatible("ExchangeStiffnessConstant", "J/m", A=A, enforce_unit=True)
-    K1 = me._entity.from_compatible("UniaxialAnisotropyConstant", "J/m^3", K1=K1, enforce_unit=True)
+    K1 = me._entity.from_compatible(
+        "MagnetocrystallineAnisotropyConstantK1",
+        "J/m^3",
+        K1=K1,
+        compatible_entities=("UniaxialAnisotropyConstant"),
+        enforce_unit=True,
+    )
 
     Ms_arr = Ms.value
     A_arr = A.value
@@ -54,7 +65,7 @@ def prepare_Ms_A_K1(
     if not (Ms_arr.shape == A_arr.shape == K1_arr.shape):
         raise ValueError(
             f"Input arrays must have the same shape. Shapes are Ms: {Ms_arr.shape}, "
-            f"A: {A_arr.shape}, Ku: {K1_arr.shape}"
+            f"A: {A_arr.shape}, K1: {K1_arr.shape}"
         )
 
     return Ms_arr, A_arr, K1_arr
