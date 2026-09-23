@@ -226,6 +226,7 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
 
     This function predicts intrinsic properties saturation magnetization Ms, exchange stiffness
     A and anisotropy constant K1 given a set of characteristic hysteresis parameters.
+    Input samples outside the model's training data range produce NaN values.
 
     The following models are available for the prediction:
 
@@ -258,7 +259,7 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
         >>> import mammos_ai
         >>> import mammos_entity as me
         >>> dat = mammos_ai.Ms_A_K1_from_Hc_Mr_BHmax(
-        ...     me.Entity("CoercivityHcExternal", 1e4, "A/m"),
+        ...     me.Entity("CoercivityHcExternal", 1e5, "A/m"),
         ...     me.Entity("Remanence", 1e6, "A/m"),
         ...     me.Entity("MaximumEnergyProduct", 200e3, "J/m^3"),
         ... )

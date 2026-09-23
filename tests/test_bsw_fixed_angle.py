@@ -7,6 +7,9 @@ import mammos_ai
 from mammos_ai._beyond_stoner_wohlfarth_fixed_angle import (
     cube50_singlegrain_random_forest_v0_1 as cube50_model,
 )
+from mammos_ai._beyond_stoner_wohlfarth_fixed_angle import (
+    cube50_singlegrain_random_forest_v1_0 as cube50_inverse_model,
+)
 
 
 def test_in_training_range_2d_array_inputs():
@@ -20,6 +23,55 @@ def test_in_training_range_2d_array_inputs():
     assert isinstance(in_range, np.ndarray)
     assert in_range.shape == (2, 2)
     assert np.all(in_range == np.array([[True, True], [False, False]]))
+
+
+def test_in_inverse_training_range_2d_array_inputs():
+    """Test inverse training range boundaries and input shape preservation."""
+    ranges = cube50_inverse_model._INVERSE_TRAINING_DATA_RANGE
+    Hc_min, Hc_max = (value.q.to_value("A/m") for value in ranges["Hc"])
+    Mr_min, Mr_max = (value.q.to_value("A/m") for value in ranges["Mr"])
+    BHmax_min, BHmax_max = (value.q.to_value("J/m3") for value in ranges["BHmax"])
+
+    Hc = np.array([[Hc_min, Hc_max, Hc_min - 1], [Hc_min, Hc_min, Hc_min]])
+    Mr = np.array([[Mr_min, Mr_max, Mr_min], [Mr_min - 1, Mr_min, Mr_min]])
+    BHmax = np.array([[BHmax_min, BHmax_max, BHmax_min], [BHmax_min, BHmax_min - 1, BHmax_min]])
+
+    in_range = cube50_inverse_model._in_inverse_training_range(Hc, Mr, BHmax)
+
+    assert in_range.shape == (2, 3)
+    assert np.array_equal(in_range, [[True, True, False], [False, False, True]])
+
+
+def test_predict_intrinsic_out_of_range_samples_are_nan(monkeypatch):
+    """Test that only in-range samples are passed to the inverse model."""
+
+    class FakeInput:
+        name = "input"
+
+    class FakeSession:
+        def __init__(self, path, options):
+            pass
+
+        def get_inputs(self):
+            return [FakeInput()]
+
+        def run(self, output_names, inputs):
+            X_log = inputs["input"]
+            assert X_log.shape == (1, 3)
+            predictions = np.array([[1e6, 1e-12, 1e6]], dtype=np.float32)
+            return [np.log1p(predictions)]
+
+    monkeypatch.setattr(cube50_inverse_model, "_model_path", lambda model_key: model_key)
+    monkeypatch.setattr(cube50_inverse_model.ort, "InferenceSession", FakeSession)
+
+    Hc = np.array([1e6, 1e4])
+    Mr = np.array([1e6, 1e6])
+    BHmax = np.array([2e5, 2e5])
+
+    Ms, A, K1 = cube50_inverse_model.predict_intrinsic(Hc, Mr, BHmax)
+
+    assert np.all(np.isfinite([Ms[0], A[0], K1[0]]))
+    assert np.all(np.isnan([Ms[1], A[1], K1[1]]))
 
 
 def test_classify_magnetic_from_Ms_A_K_out_of_range_2d_array():

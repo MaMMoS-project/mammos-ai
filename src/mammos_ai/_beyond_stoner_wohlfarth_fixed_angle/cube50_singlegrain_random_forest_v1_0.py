@@ -62,6 +62,21 @@ _TRAINING_DATA_RANGE = {
     ),
 }
 
+_INVERSE_TRAINING_DATA_RANGE = {
+    "Hc": (
+        me.Entity("CoercivityHcExternal", 10653.936927269358),
+        me.Entity("CoercivityHcExternal", 7951766.352396424),
+    ),
+    "Mr": (
+        me.Entity("Remanence", 79624.3313859632),
+        me.Entity("Remanence", 3886327.899002664),
+    ),
+    "BHmax": (
+        me.Entity("MaximumEnergyProduct", 1989.527623756496),
+        me.Entity("MaximumEnergyProduct", 4706524.532260148),
+    ),
+}
+
 
 CLASSIFY_METADATA = {
     "model_name": NAME,
@@ -119,6 +134,22 @@ def _in_training_range(Ms_arr, A_arr, K1_arr) -> np.ndarray:
 
     in_range &= (l_A >= threshold) & (l_K >= threshold)
     return in_range
+
+
+def _in_inverse_training_range(Hc_arr: np.ndarray, Mr_arr: np.ndarray, BHmax_arr: np.ndarray) -> np.ndarray:
+    """Check if each sample is within the inverse-model training data range."""
+    Hc_min, Hc_max = (value.q.to_value("A/m") for value in _INVERSE_TRAINING_DATA_RANGE["Hc"])
+    Mr_min, Mr_max = (value.q.to_value("A/m") for value in _INVERSE_TRAINING_DATA_RANGE["Mr"])
+    BHmax_min, BHmax_max = (value.q.to_value("J/m3") for value in _INVERSE_TRAINING_DATA_RANGE["BHmax"])
+
+    return (
+        (Hc_arr >= Hc_min)
+        & (Hc_arr <= Hc_max)
+        & (Mr_arr >= Mr_min)
+        & (Mr_arr <= Mr_max)
+        & (BHmax_arr >= BHmax_min)
+        & (BHmax_arr <= BHmax_max)
+    )
 
 
 def is_hard_magnet(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) -> np.ndarray:
@@ -200,16 +231,19 @@ def predict_intrinsic(
     Returns:
         A tuple ``(Ms, A, K1)`` containing the predicted saturation magnetization,
         exchange stiffness constant, and uniaxial ansitropy constant in SI units. Each array has the
-        same shape as the input arrays.
+        same shape as the input arrays. Samples outside the training data range
+        are returned as NaN values.
     """
-    X_log = np.log1p(np.column_stack([Hc_arr.ravel(), Mr_arr.ravel(), BHmax_arr.ravel()]).astype(np.float32))
-    y_log = np.full((X_log.shape[0], 3), np.nan, dtype=np.float32)
+    X = np.column_stack([Hc_arr.ravel(), Mr_arr.ravel(), BHmax_arr.ravel()]).astype(np.float32)
+    y_log = np.full((X.shape[0], 3), np.nan, dtype=np.float32)
+    mask = _in_inverse_training_range(Hc_arr, Mr_arr, BHmax_arr).ravel()
 
-    # NOTE: assumes hard magnet TODO: discuss
-    path = _model_path("inverse")
-    session = ort.InferenceSession(path, SESSION_OPTIONS)
-    res = session.run(None, {session.get_inputs()[0].name: X_log})[0]
-    y_log = res
+    if np.any(mask):
+        path = _model_path("inverse")
+        session = ort.InferenceSession(path, SESSION_OPTIONS)
+        X_log = np.log1p(X[mask])
+        res = session.run(None, {session.get_inputs()[0].name: X_log})[0]
+        y_log[mask] = res
 
     # inverse log-tf
     out = np.expm1(y_log).reshape(Hc_arr.shape + (3,))
