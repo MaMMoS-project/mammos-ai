@@ -258,6 +258,46 @@ def test_Hc_Mr_BHmax_from_Ms_A_K1_single_input(Ms, A, K1):
 @pytest.mark.parametrize(
     "Ms",
     [
+        me.Entity("SpontaneousMagnetization", 1e6),
+        me.Entity("SpontaneousMagnetization", 1e6).q,
+        me.Entity("SpontaneousMagnetization", 1e6).value,
+    ],
+)
+@pytest.mark.parametrize(
+    "A",
+    [
+        me.Entity("ExchangeStiffnessConstant", 1e-12),
+        me.Entity("ExchangeStiffnessConstant", 1e-12).q,
+        me.Entity("ExchangeStiffnessConstant", 1e-12).value,
+    ],
+)
+@pytest.mark.parametrize(
+    "K1",
+    [
+        me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e6),
+        me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e6).q,
+        me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e6).value,
+    ],
+)
+def test_symbolic_regression_Hc_Mr_BHmax_from_Ms_A_K_single_input(Ms, A, K1):
+    """Test Hc, Mr, BHmax prediction from Ms, A, K1 using the symbolic regression model."""
+    extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K1(
+        Ms, A, K1, model="cube50_singlegrain_symbolic_regression_v1.0"
+    )
+
+    assert isinstance(extrinsic_properties, mammos_analysis.hysteresis.ExtrinsicProperties)
+    assert isinstance(extrinsic_properties.Hc, me.Entity)
+    assert isinstance(extrinsic_properties.Mr, me.Entity)
+    assert isinstance(extrinsic_properties.BHmax, me.Entity)
+
+    assert np.all(extrinsic_properties.Hc.q > 0)
+    assert np.all(extrinsic_properties.Mr.q > 0)
+    assert np.all(extrinsic_properties.BHmax.q > 0)
+
+
+@pytest.mark.parametrize(
+    "Ms",
+    [
         me.Entity("SpontaneousMagnetization", 1e6, "A/m"),
         me.Entity("SaturationMagnetization", 1e6, "A/m"),
     ],
