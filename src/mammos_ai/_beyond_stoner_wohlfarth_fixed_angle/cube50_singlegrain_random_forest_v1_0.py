@@ -27,6 +27,7 @@ FILENAMES = {
     "classifier_hard_soft": "classifier_hard_soft_cube50_singlegrain_random_forest_v1.0.onnx",
     "soft": "soft_cube50_singlegrain_random_forest_v1.0.onnx",
     "hard": "hard_cube50_singlegrain_random_forest_v1.0.onnx",
+    "inverse": "inverse_hard_cube50_singlegrain_random_forest_v1.0.onnx",
 }
 
 _DESCRIPTION = (
@@ -58,6 +59,21 @@ _TRAINING_DATA_RANGE = {
     "K1": (
         me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e4),
         me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e7),
+    ),
+}
+
+_INVERSE_TRAINING_DATA_RANGE = {
+    "Hc": (
+        me.Entity("CoercivityHcExternal", 10653.936927269358),
+        me.Entity("CoercivityHcExternal", 7951766.352396424),
+    ),
+    "Mr": (
+        me.Entity("Remanence", 79624.3313859632),
+        me.Entity("Remanence", 3886327.899002664),
+    ),
+    "BHmax": (
+        me.Entity("MaximumEnergyProduct", 1989.527623756496),
+        me.Entity("MaximumEnergyProduct", 4706524.532260148),
     ),
 }
 
@@ -120,6 +136,22 @@ def _in_training_range(Ms_arr, A_arr, K1_arr) -> np.ndarray:
     return in_range
 
 
+def _in_inverse_training_range(Hc_arr: np.ndarray, Mr_arr: np.ndarray, BHmax_arr: np.ndarray) -> np.ndarray:
+    """Check if each sample is within the inverse-model training data range."""
+    Hc_min, Hc_max = (value.q.to_value("A/m") for value in _INVERSE_TRAINING_DATA_RANGE["Hc"])
+    Mr_min, Mr_max = (value.q.to_value("A/m") for value in _INVERSE_TRAINING_DATA_RANGE["Mr"])
+    BHmax_min, BHmax_max = (value.q.to_value("J/m3") for value in _INVERSE_TRAINING_DATA_RANGE["BHmax"])
+
+    return (
+        (Hc_arr >= Hc_min)
+        & (Hc_arr <= Hc_max)
+        & (Mr_arr >= Mr_min)
+        & (Mr_arr <= Mr_max)
+        & (BHmax_arr >= BHmax_min)
+        & (BHmax_arr <= BHmax_max)
+    )
+
+
 def is_hard_magnet(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) -> np.ndarray:
     """Classify each sample as soft (False) or hard (True) magnetic.
 
@@ -147,7 +179,9 @@ def is_hard_magnet(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) ->
     return labels.reshape(Ms_arr.shape)
 
 
-def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) -> np.ndarray:
+def predict_extrinsic(
+    Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Predict Hc, Mr and BHmax for each sample.
 
     Args:
@@ -156,8 +190,9 @@ def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray)
         K1_arr: Uniaxial anisotropy values in J/m^3.
 
     Returns:
-        Array of shape ``(N, 3)`` containing ``[Hc, Mr, BHmax]`` predictions in
-        SI units.
+        A tuple ``(Hc, Mr, BHmax)`` containing the predicted coercive field,
+        remanence, and maximum energy product in SI units. Each array has the
+        same shape as the input arrays.
     """
     mat_class = is_hard_magnet(Ms_arr, A_arr, K1_arr)
 
@@ -181,3 +216,38 @@ def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray)
     Mr_val = out[..., 1]
     BHmax_val = out[..., 2]
     return Hc_val, Mr_val, BHmax_val
+
+
+def predict_intrinsic(
+    Hc_arr: np.ndarray, Mr_arr: np.ndarray, BHmax_arr: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Predict Ms, A and K1 for each sample.
+
+    Args:
+        Hc_arr: Coercive field values in A/m.
+        Mr_arr: Remanence values in A/m.
+        BHmax_arr: Maximum Energy Product values in J/m^3.
+
+    Returns:
+        A tuple ``(Ms, A, K1)`` containing the predicted saturation magnetization,
+        exchange stiffness constant, and uniaxial ansitropy constant in SI units. Each array has the
+        same shape as the input arrays. Samples outside the training data range
+        are returned as NaN values.
+    """
+    X = np.column_stack([Hc_arr.ravel(), Mr_arr.ravel(), BHmax_arr.ravel()]).astype(np.float32)
+    y_log = np.full((X.shape[0], 3), np.nan, dtype=np.float32)
+    mask = _in_inverse_training_range(Hc_arr, Mr_arr, BHmax_arr).ravel()
+
+    if np.any(mask):
+        path = _model_path("inverse")
+        session = ort.InferenceSession(path, SESSION_OPTIONS)
+        X_log = np.log1p(X[mask])
+        res = session.run(None, {session.get_inputs()[0].name: X_log})[0]
+        y_log[mask] = res
+
+    # inverse log-tf
+    out = np.expm1(y_log).reshape(Hc_arr.shape + (3,))
+    Ms_val = out[..., 0]
+    A_val = out[..., 1]
+    K1_val = out[..., 2]
+    return Ms_val, A_val, K1_val
