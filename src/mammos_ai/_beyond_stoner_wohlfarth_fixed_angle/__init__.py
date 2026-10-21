@@ -63,11 +63,10 @@ def is_hard_magnet_from_Ms_A_K1(
 
     The following models are available for the prediction:
 
-    - ``inverse_hard_cube50_singlegrain_random_forest_v1.0``: Random forest model trained on extended
+    - ``cube50_singlegrain_random_forest_v1.0``: Random forest model trained on extended
       simulated data for single grain cubic particles with 50 nm edge length with
       the external field applied parallel to the anisotropy axis. These are both
-      aligned along an edge of the cube. The inverse model is trained with
-      the hard-magnet data only. Further details on the training data
+      aligned along an edge of the cube. Further details on the training data
       can be found in the
       `training repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/single-grain-easy-axis-model>`_.
       Model files are downloaded from the
@@ -236,15 +235,18 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
 
     This function predicts intrinsic properties saturation magnetization Ms, exchange stiffness
     A and anisotropy constant K1 given a set of characteristic hysteresis parameters.
-    Input samples outside the model's training data range produce NaN values.
+    The inverse model is trained only on hard-magnet samples. Inputs outside
+    its hard-magnet training-data range produce NaN values. Inputs within that
+    range are evaluated under the assumption that they describe a hard magnet;
+    the function does not classify them independently.
 
     The following models are available for the prediction:
 
-    - ``inverse_hard_cube50_singlegrain_random_forest_v1.0``: Random forest model trained on extended
-      simulated data for single grain cubic particles with 50 nm edge length with
-      the external field applied parallel to the anisotropy axis. These are both
-      aligned along an edge of the cube. Further details on the training data
-      can be found in the
+    - ``cube50_singlegrain_random_forest_v1.0``: Random forest model trained on
+      the hard-magnet subset of extended simulated data for single grain cubic
+      particles with 50 nm edge length with the external field applied parallel
+      to the anisotropy axis. These are both aligned along an edge of the cube.
+      Further details on the training data can be found in the
       `training repository <https://github.com/MaMMoS-project/ML-models/tree/main/beyond-stoner-wohlfarth/inverse-single-grain-easy-axis-model>`_.
       Model files are downloaded from the
       `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.

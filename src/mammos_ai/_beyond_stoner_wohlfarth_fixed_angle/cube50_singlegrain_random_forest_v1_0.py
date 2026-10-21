@@ -230,7 +230,7 @@ def predict_intrinsic(
 
     Returns:
         A tuple ``(Ms, A, K1)`` containing the predicted saturation magnetization,
-        exchange stiffness constant, and uniaxial ansitropy constant in SI units. Each array has the
+        exchange stiffness constant, and uniaxial anisotropy constant in SI units. Each array has the
         same shape as the input arrays. Samples outside the training data range
         are returned as NaN values.
     """
