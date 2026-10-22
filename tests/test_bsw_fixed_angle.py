@@ -7,6 +7,9 @@ import mammos_ai
 from mammos_ai._beyond_stoner_wohlfarth_fixed_angle import (
     cube50_singlegrain_random_forest_v0_1 as cube50_model,
 )
+from mammos_ai._beyond_stoner_wohlfarth_fixed_angle import (
+    cube50_singlegrain_random_forest_v1_0 as cube50_model_v1_0,
+)
 
 
 def test_in_training_range_2d_array_inputs():
@@ -20,6 +23,41 @@ def test_in_training_range_2d_array_inputs():
     assert isinstance(in_range, np.ndarray)
     assert in_range.shape == (2, 2)
     assert np.all(in_range == np.array([[True, True], [False, False]]))
+
+
+def test_in_inverse_training_range_2d_array_inputs():
+    """Test inverse training range boundaries and input shape preservation."""
+    ranges = cube50_model_v1_0._INVERSE_TRAINING_DATA_RANGE
+    Hc_min, Hc_max = (value.value for value in ranges["Hc"])
+    Mr_min, Mr_max = (value.value for value in ranges["Mr"])
+    BHmax_min, BHmax_max = (value.value for value in ranges["BHmax"])
+
+    Hc = np.array([[Hc_min, Hc_max, Hc_min - 1], [Hc_min, Hc_min, Hc_min]])
+    Mr = np.array([[Mr_min, Mr_max, Mr_min], [Mr_min - 1, Mr_min, Mr_min]])
+    BHmax = np.array([[BHmax_min, BHmax_max, BHmax_min], [BHmax_min, BHmax_min - 1, BHmax_min]])
+
+    in_range = cube50_model_v1_0._in_inverse_training_range(Hc, Mr, BHmax)
+
+    assert in_range.shape == (2, 3)
+    assert np.array_equal(in_range, [[True, True, False], [False, False, True]])
+
+
+def test_predict_intrinsic_out_of_range_samples_are_nan():
+    """Test predictions for samples inside and outside the training range."""
+    ranges = cube50_model_v1_0._INVERSE_TRAINING_DATA_RANGE
+    Hc_min, Hc_max = (value.value for value in ranges["Hc"])
+    Mr_min, Mr_max = (value.value for value in ranges["Mr"])
+    BHmax_min, BHmax_max = (value.value for value in ranges["BHmax"])
+
+    Hc = np.array([Hc_min, Hc_max, Hc_min - 1, Hc_min, Hc_min])
+    Mr = np.array([Mr_min, Mr_max, Mr_min, Mr_min - 1, Mr_min])
+    BHmax = np.array([BHmax_min, BHmax_max, BHmax_min, BHmax_min, BHmax_min - 1])
+
+    Ms, A, K1 = cube50_model_v1_0.predict_intrinsic(Hc, Mr, BHmax)
+    predictions = np.column_stack([Ms, A, K1])
+
+    assert np.all(np.isfinite(predictions[:2]))
+    assert np.all(np.isnan(predictions[2:]))
 
 
 def test_classify_magnetic_from_Ms_A_K1_out_of_range_2d_array():
