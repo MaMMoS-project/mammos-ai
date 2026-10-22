@@ -8,7 +8,7 @@ from mammos_ai._beyond_stoner_wohlfarth_fixed_angle import (
     cube50_singlegrain_random_forest_v0_1 as cube50_model,
 )
 from mammos_ai._beyond_stoner_wohlfarth_fixed_angle import (
-    cube50_singlegrain_random_forest_v1_0 as cube50_inverse_model,
+    cube50_singlegrain_random_forest_v1_0 as cube50_model_v1_0,
 )
 
 
@@ -27,7 +27,7 @@ def test_in_training_range_2d_array_inputs():
 
 def test_in_inverse_training_range_2d_array_inputs():
     """Test inverse training range boundaries and input shape preservation."""
-    ranges = cube50_inverse_model._INVERSE_TRAINING_DATA_RANGE
+    ranges = cube50_model_v1_0._INVERSE_TRAINING_DATA_RANGE
     Hc_min, Hc_max = (value.q.to_value("A/m") for value in ranges["Hc"])
     Mr_min, Mr_max = (value.q.to_value("A/m") for value in ranges["Mr"])
     BHmax_min, BHmax_max = (value.q.to_value("J/m3") for value in ranges["BHmax"])
@@ -36,7 +36,7 @@ def test_in_inverse_training_range_2d_array_inputs():
     Mr = np.array([[Mr_min, Mr_max, Mr_min], [Mr_min - 1, Mr_min, Mr_min]])
     BHmax = np.array([[BHmax_min, BHmax_max, BHmax_min], [BHmax_min, BHmax_min - 1, BHmax_min]])
 
-    in_range = cube50_inverse_model._in_inverse_training_range(Hc, Mr, BHmax)
+    in_range = cube50_model_v1_0._in_inverse_training_range(Hc, Mr, BHmax)
 
     assert in_range.shape == (2, 3)
     assert np.array_equal(in_range, [[True, True, False], [False, False, True]])
@@ -61,14 +61,14 @@ def test_predict_intrinsic_out_of_range_samples_are_nan(monkeypatch):
             predictions = np.array([[1e6, 1e-12, 1e6]], dtype=np.float32)
             return [np.log1p(predictions)]
 
-    monkeypatch.setattr(cube50_inverse_model, "_model_path", lambda model_key: model_key)
-    monkeypatch.setattr(cube50_inverse_model.ort, "InferenceSession", FakeSession)
+    monkeypatch.setattr(cube50_model_v1_0, "_model_path", lambda model_key: model_key)
+    monkeypatch.setattr(cube50_model_v1_0.ort, "InferenceSession", FakeSession)
 
     Hc = np.array([1e6, 1e4])
     Mr = np.array([1e6, 1e6])
     BHmax = np.array([2e5, 2e5])
 
-    Ms, A, K1 = cube50_inverse_model.predict_intrinsic(Hc, Mr, BHmax)
+    Ms, A, K1 = cube50_model_v1_0.predict_intrinsic(Hc, Mr, BHmax)
 
     assert np.all(np.isfinite([Ms[0], A[0], K1[0]]))
     assert np.all(np.isnan([Ms[1], A[1], K1[1]]))
