@@ -179,9 +179,7 @@ def is_hard_magnet(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) ->
     return labels.reshape(Ms_arr.shape)
 
 
-def predict_extrinsic(
-    Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) -> np.ndarray:
     """Predict Hc, Mr and BHmax for each sample.
 
     Args:
@@ -190,9 +188,8 @@ def predict_extrinsic(
         K1_arr: Uniaxial anisotropy values in J/m^3.
 
     Returns:
-        A tuple ``(Hc, Mr, BHmax)`` containing the predicted coercive field,
-        remanence, and maximum energy product in SI units. Each array has the
-        same shape as the input arrays.
+        Array of shape ``(N, 3)`` containing ``[Hc, Mr, BHmax]`` predictions in
+        SI units.
     """
     mat_class = is_hard_magnet(Ms_arr, A_arr, K1_arr)
 
