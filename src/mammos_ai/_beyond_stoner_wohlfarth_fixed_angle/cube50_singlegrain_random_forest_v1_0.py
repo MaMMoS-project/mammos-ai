@@ -137,7 +137,7 @@ def _in_training_range(Ms_arr, A_arr, K1_arr) -> np.ndarray:
 
 
 def _in_inverse_training_range(Hc_arr: np.ndarray, Mr_arr: np.ndarray, BHmax_arr: np.ndarray) -> np.ndarray:
-    """Check if each sample is within the inverse-model training data range."""
+    """Check if each sample is within the inverse model training data range."""
     Hc_min, Hc_max = (value.q.to_value("A/m") for value in _INVERSE_TRAINING_DATA_RANGE["Hc"])
     Mr_min, Mr_max = (value.q.to_value("A/m") for value in _INVERSE_TRAINING_DATA_RANGE["Mr"])
     BHmax_min, BHmax_max = (value.q.to_value("J/m3") for value in _INVERSE_TRAINING_DATA_RANGE["BHmax"])
@@ -229,7 +229,7 @@ def predict_intrinsic(
         BHmax_arr: Maximum Energy Product values in J/m^3.
 
     Returns:
-        A tuple ``(Ms, A, K1)`` containing the predicted saturation magnetization,
+        A tuple ``(Ms, A, K1)`` containing the predicted spontaneous magnetization,
         exchange stiffness constant, and uniaxial anisotropy constant in SI units. Each array has the
         same shape as the input arrays. Samples outside the training data range
         are returned as NaN values.

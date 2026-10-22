@@ -233,9 +233,11 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
 ) -> mammos_entity.EntityCollection:
     """Predict Ms, A and K1 from hysteresis properties Hc, Mr and BHmax.
 
-    This function predicts intrinsic properties saturation magnetization Ms, exchange stiffness
-    A and anisotropy constant K1 given a set of characteristic hysteresis parameters.
-    The inverse model is trained only on hard-magnet samples. Inputs outside
+    This function predicts the intrinsic properties spontaneous magnetization Ms,
+    exchange stiffness constant A, and anisotropy constant K1 given a set of
+    characteristic hysteresis parameters.
+
+    This model is trained only on hard-magnet samples. Inputs outside
     its hard-magnet training-data range produce NaN values. Inputs within that
     range are evaluated under the assumption that they describe a hard magnet;
     the function does not classify them independently.
