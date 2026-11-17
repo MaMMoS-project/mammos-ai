@@ -1,0 +1,241 @@
+"""cube80 multi-grain random forest, v1.0.
+
+Random forest model trained on simulated hysteresis data for
+80 nm cubic polycrystalline samples.
+See the
+`Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_
+for model files and the
+`training repository <https://github.com/MaMMoS-project/ML-models>`_
+for full training-data details.
+"""
+
+from __future__ import annotations
+
+import mammos_entity as me
+import mammos_units as u
+import numpy as np
+import onnxruntime as ort
+from huggingface_hub import hf_hub_download
+
+from ._common import MODEL_REPO_ID, SESSION_OPTIONS
+
+NAME = "cube80_multigrain_random_forest_v1.0"
+MODEL_SUBFOLDER = "beyond-stoner-wohlfarth"
+
+# TODO: Confirm these names when the model files are uploaded.
+FILENAMES = {
+    "classifier_valid_invalid": "classifier_valid_invalid_cube80_multigrain_random_forest_v1.0.onnx",
+    "classifier_hard_soft": "classifier_hard_soft_cube80_multigrain_random_forest_v1.0.onnx",
+    "soft": "soft_cube80_multigrain_random_forest_v1.0.onnx",
+    "hard": "hard_cube80_multigrain_random_forest_v1.0.onnx",
+    "inverse": "inverse_hard_cube80_multigrain_random_forest_v1.0.onnx",
+}
+
+_DESCRIPTION = (
+    "Random forest model trained on extended simulated hysteresis data for 80 nm cubic polycrystalline samples."
+)
+
+_MODEL_SOURCE = "https://huggingface.co/mammos-project/mammos-ai-models"
+# TODO: Point to the exact multigrain training directory once it is public.
+_TRAINING_SOURCE = "https://github.com/MaMMoS-project/ML-models"
+
+# TODO: Confirm these bounds against the multigrain training dataset.
+_TRAINING_DATA_RANGE = {
+    "Ms": (
+        me.Entity(
+            "SpontaneousMagnetization",
+            (0.1 * u.T).to(u.A / u.m, equivalencies=u.magnetic_flux_field()),
+        ),
+        me.Entity(
+            "SpontaneousMagnetization",
+            (5.0 * u.T).to(u.A / u.m, equivalencies=u.magnetic_flux_field()),
+        ),
+    ),
+    "A": (
+        me.Entity("ExchangeStiffnessConstant", 1e-13),
+        me.Entity("ExchangeStiffnessConstant", 1e-11),
+    ),
+    "K1": (
+        me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e4),
+        me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e7),
+    ),
+}
+
+# TODO: Replace these placeholder bounds with the extrema of the multigrain
+# inverse training dataset before registering or releasing this model.
+_INVERSE_TRAINING_DATA_RANGE = {
+    "Hc": (
+        me.Entity("CoercivityHcExternal", 10653.936927269358),
+        me.Entity("CoercivityHcExternal", 7951766.352396424),
+    ),
+    "Mr": (
+        me.Entity("Remanence", 79624.3313859632),
+        me.Entity("Remanence", 3886327.899002664),
+    ),
+    "BHmax": (
+        me.Entity("MaximumEnergyProduct", 1989.527623756496),
+        me.Entity("MaximumEnergyProduct", 4706524.532260148),
+    ),
+}
+
+
+CLASSIFY_METADATA = {
+    "model_name": NAME,
+    "description": _DESCRIPTION,
+    "training_data_range": _TRAINING_DATA_RANGE,
+    "input_parameters": ["Ms (A/m)", "A (J/m)", "K1 (J/m^3)"],
+    "output_classes": {0: "soft magnetic", 1: "hard magnetic"},
+    "source": _MODEL_SOURCE,
+    "training_source": _TRAINING_SOURCE,
+}
+
+PREDICT_METADATA = {
+    "model_name": NAME,
+    "description": _DESCRIPTION,
+    "training_data_range": _TRAINING_DATA_RANGE,
+    "input_parameters": ["Ms (A/m)", "A (J/m)", "K1 (J/m^3)"],
+    "output_parameters": ["Hc (A/m)", "Mr (A/m)", "BHmax (J/m^3)"],
+    "source": _MODEL_SOURCE,
+    "training_source": _TRAINING_SOURCE,
+}
+
+
+def _model_path(model_key: str) -> str:
+    """Return a local cached path for one ONNX file.
+
+    If the file is not already cached, it will be downloaded from Hugging Face.
+    """
+    return hf_hub_download(
+        repo_id=MODEL_REPO_ID,
+        filename=FILENAMES[model_key],
+        subfolder=MODEL_SUBFOLDER,
+    )
+
+
+def _in_training_range(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) -> np.ndarray:
+    """Check if each sample is within the training data range."""
+    Ms_min, Ms_max = (value.q.to_value("A/m") for value in _TRAINING_DATA_RANGE["Ms"])
+    A_min, A_max = (value.q.to_value("J/m") for value in _TRAINING_DATA_RANGE["A"])
+    K1_min, K1_max = (value.q.to_value("J/m3") for value in _TRAINING_DATA_RANGE["K1"])
+
+    in_range = (
+        (Ms_arr >= Ms_min)
+        & (Ms_arr <= Ms_max)
+        & (A_arr >= A_min)
+        & (A_arr <= A_max)
+        & (K1_arr >= K1_min)
+        & (K1_arr <= K1_max)
+    )
+    with np.errstate(divide="ignore", invalid="ignore"):
+        l_A = np.sqrt(2 * A_arr / (u.constants.mu0.value * Ms_arr**2))
+        l_K = np.sqrt(A_arr / K1_arr)
+
+    threshold = 1e-9  # 1 nm
+    in_range &= (l_A >= threshold) & (l_K >= threshold)
+    return in_range
+
+
+def _in_inverse_training_range(Hc_arr: np.ndarray, Mr_arr: np.ndarray, BHmax_arr: np.ndarray) -> np.ndarray:
+    """Check if each sample is within the inverse training data range."""
+    Hc_min, Hc_max = (value.q.to_value("A/m") for value in _INVERSE_TRAINING_DATA_RANGE["Hc"])
+    Mr_min, Mr_max = (value.q.to_value("A/m") for value in _INVERSE_TRAINING_DATA_RANGE["Mr"])
+    BHmax_min, BHmax_max = (value.q.to_value("J/m3") for value in _INVERSE_TRAINING_DATA_RANGE["BHmax"])
+
+    return (
+        (Hc_arr >= Hc_min)
+        & (Hc_arr <= Hc_max)
+        & (Mr_arr >= Mr_min)
+        & (Mr_arr <= Mr_max)
+        & (BHmax_arr >= BHmax_min)
+        & (BHmax_arr <= BHmax_max)
+    )
+
+
+def is_hard_magnet(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) -> np.ndarray:
+    """Classify each sample as soft, hard, or invalid.
+
+    Args:
+        Ms_arr: Spontaneous magnetization values in A/m.
+        A_arr: Exchange stiffness values in J/m.
+        K1_arr: Uniaxial anisotropy values in J/m^3.
+
+    Returns:
+        Classification array with the same shape as the inputs.
+    """
+    in_range = _in_training_range(Ms_arr, A_arr, K1_arr)
+    X = np.column_stack([Ms_arr.ravel(), A_arr.ravel(), K1_arr.ravel()]).astype(np.float32)
+
+    session = ort.InferenceSession(_model_path("classifier_hard_soft"), SESSION_OPTIONS)
+    results = session.run(None, {session.get_inputs()[0].name: X})[0]
+    labels = results.astype(bool).astype(object)
+
+    session = ort.InferenceSession(_model_path("classifier_valid_invalid"), SESSION_OPTIONS)
+    results = session.run(None, {session.get_inputs()[0].name: X})[0]
+    valid = results.astype(bool)
+
+    labels[~in_range.ravel()] = np.nan
+    labels[~valid] = np.nan
+    return labels.reshape(Ms_arr.shape)
+
+
+def predict_extrinsic(
+    Ms_arr: np.ndarray,
+    A_arr: np.ndarray,
+    K1_arr: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Predict Hc, Mr and BHmax for each sample.
+
+    Args:
+        Ms_arr: Spontaneous magnetization values in A/m.
+        A_arr: Exchange stiffness values in J/m.
+        K1_arr: Uniaxial anisotropy values in J/m^3.
+
+    Returns:
+        A tuple ``(Hc, Mr, BHmax)`` in SI units. Each array has the same
+        shape as the input arrays.
+    """
+    mat_class = is_hard_magnet(Ms_arr, A_arr, K1_arr)
+    X_log = np.log1p(np.column_stack([Ms_arr.ravel(), A_arr.ravel(), K1_arr.ravel()]).astype(np.float32))
+
+    y_log = np.full((X_log.shape[0], 3), np.nan, dtype=np.float32)
+    classes = np.atleast_1d(mat_class).ravel()
+    for is_hard in (False, True):
+        mask = classes == is_hard
+        if np.any(mask):
+            path = _model_path("hard" if is_hard else "soft")
+            session = ort.InferenceSession(path, SESSION_OPTIONS)
+            res = session.run(None, {session.get_inputs()[0].name: X_log[mask]})[0]
+            y_log[mask] = res
+
+    out = np.expm1(y_log).reshape(Ms_arr.shape + (3,))
+    return out[..., 0], out[..., 1], out[..., 2]
+
+
+def predict_intrinsic(
+    Hc_arr: np.ndarray,
+    Mr_arr: np.ndarray,
+    BHmax_arr: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Predict Ms, A and K1 for each sample.
+
+    Args:
+        Hc_arr: Coercive field values in A/m.
+        Mr_arr: Remanence values in A/m.
+        BHmax_arr: Maximum energy product values in J/m^3.
+
+    Returns:
+        A tuple ``(Ms, A, K1)`` in SI units. Each array has the same shape
+        as the input arrays. Out-of-range samples are returned as NaN values.
+    """
+    X = np.column_stack([Hc_arr.ravel(), Mr_arr.ravel(), BHmax_arr.ravel()]).astype(np.float32)
+    y_log = np.full((X.shape[0], 3), np.nan, dtype=np.float32)
+    mask = _in_inverse_training_range(Hc_arr, Mr_arr, BHmax_arr).ravel()
+
+    if np.any(mask):
+        session = ort.InferenceSession(_model_path("inverse"), SESSION_OPTIONS)
+        X_log = np.log1p(X[mask])
+        res = session.run(None, {session.get_inputs()[0].name: X_log})[0]
+        y_log[mask] = res
+
+    out = np.expm1(y_log).reshape(Hc_arr.shape + (3,))
+    return out[..., 0], out[..., 1], out[..., 2]
