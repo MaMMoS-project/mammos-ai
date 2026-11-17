@@ -2,9 +2,9 @@
 
 Each model lives in its own module in this subpackage. The public functions
 below look up the requested model in ``_REGISTRY`` and call it. To add a
-new model, write a new module that provides ``NAME``, ``CLASSIFY_METADATA``,
-``PREDICT_METADATA``, ``is_hard_magnet`` and ``predict_extrinsic``, then add
-it to ``_REGISTRY``.
+new model, write a new module that provides ``NAME`` and the metadata and
+prediction functions for its supported capabilities, then add it to
+``_REGISTRY``.
 """
 
 from __future__ import annotations
@@ -19,12 +19,17 @@ if TYPE_CHECKING:
 import mammos_analysis
 import mammos_entity as me
 
-from . import cube50_singlegrain_random_forest_v0_1, cube50_singlegrain_random_forest_v1_0
+from . import (
+    cube50_singlegrain_random_forest_v0_1,
+    cube50_singlegrain_random_forest_v1_0,
+    cube80_multigrain_random_forest_v1_0,
+)
 from ._common import prepare_Hc_Mr_BHmax, prepare_Ms_A_K1
 
 _REGISTRY = {
     "cube50_singlegrain_random_forest_v0.1": cube50_singlegrain_random_forest_v0_1,
     "cube50_singlegrain_random_forest_v1.0": cube50_singlegrain_random_forest_v1_0,
+    "cube80_multigrain_random_forest_v1.0": cube80_multigrain_random_forest_v1_0,
 }
 
 
@@ -62,6 +67,15 @@ def is_hard_magnet_from_Ms_A_K1(
     numpy array with the same shape is returned.
 
     The following models are available for the prediction:
+
+    - ``cube80_multigrain_random_forest_v1.0``: Random forest model trained on
+      simulated hysteresis data for 80 nm cubic polycrystalline samples. The
+      model uses separate classifiers to determine whether a sample is valid
+      and, if valid, whether it is soft or hard magnetic. Invalid samples
+      return NaN values. Further details can be found in the
+      `training repository <https://github.com/MaMMoS-project/ML-models>`_.
+      Model files are downloaded from the
+      `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
 
     - ``cube50_singlegrain_random_forest_v1.0``: Random forest model trained on extended
       simulated data for single grain cubic particles with 50 nm edge length with
@@ -149,6 +163,15 @@ def Hc_Mr_BHmax_from_Ms_A_K1(
     material parameters.
 
     The following models are available for the prediction:
+
+    - ``cube80_multigrain_random_forest_v1.0``: Random forest model trained on
+      simulated hysteresis data for 80 nm cubic polycrystalline samples. The
+      model uses separate classifiers to determine whether a sample is valid
+      and, if valid, whether it is soft or hard magnetic. Invalid samples
+      produce NaN predictions. Further details can be found in the
+      `training repository <https://github.com/MaMMoS-project/ML-models>`_.
+      Model files are downloaded from the
+      `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
 
     - ``cube50_singlegrain_random_forest_v1.0``: Random forest model trained on extended
       simulated data for single grain cubic particles with 50 nm edge length with
@@ -243,6 +266,13 @@ def Ms_A_K1_from_Hc_Mr_BHmax(
     the function does not classify them independently.
 
     The following models are available for the prediction:
+
+    - ``cube80_multigrain_random_forest_v1.0``: Random forest model trained on
+      the hard-magnet subset of simulated hysteresis data for 80 nm cubic
+      polycrystalline samples. Further details can be found in the
+      `training repository <https://github.com/MaMMoS-project/ML-models>`_.
+      Model files are downloaded from the
+      `Hugging Face model repository <https://huggingface.co/mammos-project/mammos-ai-models>`_.
 
     - ``cube50_singlegrain_random_forest_v1.0``: Random forest model trained on
       the hard-magnet subset of extended simulated data for single grain cubic
