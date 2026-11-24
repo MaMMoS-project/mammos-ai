@@ -63,6 +63,23 @@ doi: [10.1109/TMAG.2026.3689962](https://doi.org/10.1109/TMAG.2026.3689962).
 }
 ```
 
+The software is also archived on Zenodo. To cite it independently of a specific
+release, use the Concept DOI:
+
+C. Winkler et al., *mammos-ai* [Software], Zenodo, 2026,
+doi: [10.5281/zenodo.21717867](https://doi.org/10.5281/zenodo.21717867).
+
+```bibtex
+@software{mammos_ai_zenodo,
+  author={Winkler, Christina and Colnaghi, Timoteo and Pathak, Swapneel Amit and Petrocchi, Andrea and Adams, Michael and Holt, Samuel and Lang, Martin and Fangohr, Hans and Marek, Andreas},
+  title={mammos-ai},
+  year={2026},
+  publisher={Zenodo},
+  doi={10.5281/zenodo.21717867},
+  url={https://doi.org/10.5281/zenodo.21717867}
+}
+```
+
 ## Acknowledgements
 
 This software has been supported by the European Union’s Horizon Europe research and innovation programme under grant agreement No 101135546 [MaMMoS](https://mammos-project.github.io/).
