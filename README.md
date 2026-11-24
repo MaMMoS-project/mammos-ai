@@ -44,7 +44,11 @@ the first download. For information about e.g. cleaning the cache, refer to the
 
 ## How to cite
 
-TODO
+If you use `mammos-ai` in your research, please cite the following publication:
+
+H. Fangohr et al., "Toward a Magnetic Multiscale Modeling Suite (MaMMoS),"
+*IEEE Transactions on Magnetics*, vol. 62, no. 10, Art. no. 7001606, 2026,
+doi: [10.1109/TMAG.2026.3689962](https://doi.org/10.1109/TMAG.2026.3689962).
 
 ## Acknowledgements
 
