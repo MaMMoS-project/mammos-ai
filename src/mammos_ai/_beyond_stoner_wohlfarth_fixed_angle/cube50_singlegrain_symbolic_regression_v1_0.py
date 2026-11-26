@@ -140,6 +140,7 @@ def predict_extrinsic(
         SI units.
     """
     # TODO: This docstring is never showed in the documentation. Maybe we should change that.
+    in_range = _in_training_range(Ms_arr, A_arr, K1_arr)
     mu0_Ms = u.constants.mu0.value * Ms_arr
     mu0_Ms2 = mu0_Ms * Ms_arr
     H_A = 2 * K1_arr / mu0_Ms
@@ -157,5 +158,12 @@ def predict_extrinsic(
     Hc = (alpha - n * np.log(L_tilde) / kappa) * H_A
     Mr = (1 - eps_m * fact) * Ms_arr
     BH_max = (1 - eps_b * fact) ** 2 * BH_s
+
+    Hc = np.asarray(Hc)
+    Hc[~in_range] = np.nan
+    Mr = np.asarray(Mr)
+    Mr[~in_range] = np.nan
+    BH_max = np.asarray(BH_max)
+    BH_max[~in_range] = np.nan
 
     return Hc, Mr, BH_max
