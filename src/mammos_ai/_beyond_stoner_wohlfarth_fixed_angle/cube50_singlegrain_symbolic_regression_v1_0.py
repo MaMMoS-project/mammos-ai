@@ -88,7 +88,9 @@ def _in_training_range(Ms_arr, A_arr, K1_arr) -> np.ndarray:
     return in_range
 
 
-def predict_extrinsic(Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray) -> np.ndarray:
+def predict_extrinsic(
+    Ms_arr: np.ndarray, A_arr: np.ndarray, K1_arr: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     r"""Predict Hc, Mr and BHmax for each sample.
 
     This model is supposed to be correct on hard magnets only.
