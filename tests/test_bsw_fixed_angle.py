@@ -334,6 +334,57 @@ def test_symbolic_regression_Hc_Mr_BHmax_from_Ms_A_K_single_input(Ms, A, K1):
 
 
 @pytest.mark.parametrize(
+    "Ms, A, K1",
+    [
+        (
+            me.Entity("SpontaneousMagnetization", 50, "kA/m"),  # below training range,
+            me.Entity("ExchangeStiffnessConstant", 1e-12),
+            me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e5),
+        ),
+        (
+            me.Entity("SpontaneousMagnetization", 5, "MA/m"),  # above training range,
+            me.Entity("ExchangeStiffnessConstant", 1e-12),
+            me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e5),
+        ),
+        (
+            me.Entity("SpontaneousMagnetization", 1, "MA/m"),
+            me.Entity("ExchangeStiffnessConstant", 0.8e-13),  # below training range,
+            me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e5),
+        ),
+        (
+            me.Entity("SpontaneousMagnetization", 1, "MA/m"),
+            me.Entity("ExchangeStiffnessConstant", 2e-11),  # above training range,
+            me.Entity("MagnetocrystallineAnisotropyConstantK1", 1e5),
+        ),
+        (
+            me.Entity("SpontaneousMagnetization", 1, "MA/m"),
+            me.Entity("ExchangeStiffnessConstant", 1e-12),
+            me.Entity("MagnetocrystallineAnisotropyConstantK1", 0.8e4),  # below training range,
+        ),
+        (
+            me.Entity("SpontaneousMagnetization", 1, "MA/m"),
+            me.Entity("ExchangeStiffnessConstant", 1e-12),
+            me.Entity("MagnetocrystallineAnisotropyConstantK1", 2e7),  # above training range,
+        ),
+    ],
+)
+def test_symbolic_regression_out_of_training_range(Ms, A, K1):
+    """Test out of training range predictions from the symbolic regression model."""
+    extrinsic_properties = mammos_ai.Hc_Mr_BHmax_from_Ms_A_K1(
+        Ms, A, K1, model="cube50_singlegrain_symbolic_regression_v1.0"
+    )
+
+    assert isinstance(extrinsic_properties, mammos_analysis.hysteresis.ExtrinsicProperties)
+    assert isinstance(extrinsic_properties.Hc, me.Entity)
+    assert isinstance(extrinsic_properties.Mr, me.Entity)
+    assert isinstance(extrinsic_properties.BHmax, me.Entity)
+
+    assert np.isnan(extrinsic_properties.Hc.q)
+    assert np.isnan(extrinsic_properties.Mr.q)
+    assert np.isnan(extrinsic_properties.BHmax.q)
+
+
+@pytest.mark.parametrize(
     "Ms",
     [
         me.Entity("SpontaneousMagnetization", 1e6, "A/m"),
