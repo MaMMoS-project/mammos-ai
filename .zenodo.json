@@ -6,11 +6,22 @@
     },
     {
       "name": "Colnaghi, Timoteo",
+      "orcid": "0000-0002-2380-7128",
       "affiliation": "Max Planck Computing and Data Facility"
     },
     {
-      "name": "Pathak, Swapneel Amit",
-      "orcid": "0000-0003-3840-955X",
+      "name": "Marek, Andreas",
+      "orcid": "0000-0001-5403-7528",
+      "affiliation": "Max Planck Computing and Data Facility"
+    },
+    {
+      "name": "Lang, Martin",
+      "orcid": "0000-0001-7104-7867",
+      "affiliation": "Max Planck Institute for the Structure and Dynamics of Matter"
+    },
+    {
+      "name": "Holt, Samuel",
+      "orcid": "0000-0003-3323-8958",
       "affiliation": "Max Planck Institute for the Structure and Dynamics of Matter"
     },
     {
@@ -24,23 +35,14 @@
       "affiliation": "Max Planck Institute for the Structure and Dynamics of Matter"
     },
     {
-      "name": "Holt, Samuel",
-      "orcid": "0000-0003-3323-8958",
-      "affiliation": "Max Planck Institute for the Structure and Dynamics of Matter"
-    },
-    {
-      "name": "Lang, Martin",
-      "orcid": "0000-0001-7104-7867",
+      "name": "Pathak, Swapneel Amit",
+      "orcid": "0000-0003-3840-955X",
       "affiliation": "Max Planck Institute for the Structure and Dynamics of Matter"
     },
     {
       "name": "Fangohr, Hans",
       "orcid": "0000-0001-5494-7193",
       "affiliation": "Max Planck Institute for the Structure and Dynamics of Matter, European XFEL GmbH, University of Southampton"
-    },
-    {
-      "name": "Marek, Andreas",
-      "affiliation": "Max Planck Computing and Data Facility"
     }
   ],
   "title": "mammos-ai",
