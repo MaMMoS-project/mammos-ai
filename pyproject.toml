@@ -6,15 +6,11 @@ build-backend = "hatchling.build"
 name = "mammos-ai"
 version = "0.3.0"
 authors = [
-  { name = "Christina Winkler" },
-  { name = "Timoteo Colnaghi" },
-  { name = "Swapneel Amit Pathak" },
+  { name = "Martin Lang" },
+  { name = "Samuel Holt" },
   { name = "Andrea Petrocchi" },
   { name = "Michael Adams" },
-  { name = "Samuel Holt" },
-  { name = "Martin Lang" },
   { name = "Hans Fangohr" },
-  { name = "Andreas Marek" },
 ]
 description = "Pre-trained AI models"
 readme = "README.md"
