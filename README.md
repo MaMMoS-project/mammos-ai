@@ -71,7 +71,7 @@ doi: [10.5281/zenodo.21717867](https://doi.org/10.5281/zenodo.21717867).
 
 ```bibtex
 @software{mammos_ai_zenodo,
-  author={Winkler, Christina and Colnaghi, Timoteo and Pathak, Swapneel Amit and Petrocchi, Andrea and Adams, Michael and Holt, Samuel and Lang, Martin and Fangohr, Hans and Marek, Andreas},
+  author={Winkler, Christina and Colnaghi, Timoteo and Marek, Andreas and Lang, Martin and Holt, Samuel and Petrocchi, Andrea and Adams, Michael and Pathak, Swapneel Amit and Fangohr, Hans},
   title={mammos-ai},
   year={2026},
   publisher={Zenodo},
